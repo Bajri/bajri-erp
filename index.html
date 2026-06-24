@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bajri ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #faf7f5;
+            --bg-surface: #fff8f5;
+            --bg-elevated: #ffffff;
+            --accent: #CD3F20;
+            --accent-light: #e65a3a;
+            --accent-soft: rgba(205,63,32,0.08);
+            --accent-hover: rgba(205,63,32,0.12);
+            --text-primary: #2d2019;
+            --text-secondary: #6b5c4f;
+            --text-muted: #a89a84;
+            --border: rgba(205,63,32,0.12);
+            --border-hover: rgba(205,63,32,0.25);
+            --success: #34d399;
+            --success-soft: rgba(52,211,153,0.12);
+            --warning: #f59e0b;
+            --warning-soft: rgba(245,158,11,0.12);
+            --error: #f87171;
+            --shadow-sm: 0 2px 8px rgba(205,63,32,0.06);
+            --shadow-md: 0 4px 16px rgba(205,63,32,0.08);
+            --shadow-lg: 0 8px 32px rgba(205,63,32,0.12);
+            --card-radius: 16px;
+            --bounce: cubic-bezier(0.23, 1, 0.32, 1);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans Arabic', 'Segoe UI', sans-serif;
+            background: var(--bg-secondary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ── Floating Particles ── */
+        .particle-field {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .px-dot {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: pxFloat 10s ease-in-out infinite;
+        }
+        .px-dot:nth-child(odd) { animation-duration: 14s; opacity: 0.07; }
+        .px-dot:nth-child(3n) { width: 3px; height: 3px; opacity: 0.06; }
+        .px-diamond {
+            position: absolute;
+            width: 5px; height: 5px;
+            background: var(--accent);
+            transform: rotate(45deg);
+            opacity: 0.06;
+            animation: pxFloat 18s ease-in-out infinite reverse;
+        }
+        @keyframes pxFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* ── App Shell ── */
+        .app-shell {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        .app-header {
+            background: var(--accent);
+            padding: 0 28px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(205,63,32,0.25);
+            position: relative;
+            z-index: 10;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-area svg {
+            width: 32px; height: 32px;
+        }
+        .logo-area h1 {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+        .logo-area h1 span { font-weight: 800; }
+        .header-stats {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+        .header-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.9);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .header-stat .label {
+            opacity: 0.7;
+            font-size: 0.75rem;
+        }
+        .header-stat .value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            direction: ltr;
+        }
+        .header-stat .sar-icon { opacity: 0.8; }
+
+        /* ── Body Row ── */
+        .body-row {
+            display: flex;
+            flex: 1;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* ── Sidebar (RIGHT in RTL) ── */
+        .sidebar {
+            width: 64px;
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 0;
+            gap: 8px;
+            order: 2;
+            box-shadow: -2px 0 12px rgba(205,63,32,0.04);
+        }
+        .sidebar-tab {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s var(--bounce);
+            color: var(--text-muted);
+        }
+        .sidebar-tab:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+        .sidebar-tab.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(205,63,32,0.3);
+        }
+        .sidebar-tab svg {
+            width: 22px; height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .sidebar-tab .tooltip {
+            position: absolute;
+            right: 54px;
+            background: var(--text-primary);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            transform: translateX(4px);
+        }
+        .sidebar-tab:hover .tooltip {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .sidebar-divider {
+            width: 24px;
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+
+        /* ── Main Area ── */
+        .main-area {
+            flex: 1;
+            padding: 24px 32px;
+            order: 1;
+            overflow-y: auto;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeSlide 0.35s var(--ease);
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title .accent-bar {
+            width: 4px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* ── Financial Summary Bar ── */
+        .financial-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .fin-card {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s var(--bounce);
+        }
+        .fin-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .fin-card .fin-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .fin-card .fin-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            direction: ltr;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .fin-card.inflow { border-right: 3px solid var(--success); }
+        .fin-card.outflow { border-right: 3px solid var(--error); }
+        .fin-card.net { border-right: 3px solid var(--accent); }
+
+        /* ── Company Cards ── */
+        .company-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding-left: 12px;
+        }
+        .company-card {
+            position: relative;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 18px 22px;
+            padding-right: 32px;
+            cursor: pointer;
+            transition: all 0.35s var(--bounce);
+            overflow: visible;
+            box-shadow: var(--shadow-sm);
+        }
+        .company-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-3px);
+            border-color: var(--border-hover);
+        }
+        .company-card.expanded {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-hover);
+        }
+
+        /* ── Payment Indicator Dot ── */
+        .payment-dot {
+            position: absolute;
+            left: -11px;
+            top: 28px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            z-index: 2;
+            border: 3px solid var(--bg-secondary);
+            transition: all 0.4s var(--bounce);
+        }
+        .payment-dot.pending {
+            background: var(--warning);
+            box-shadow: 0 0 10px rgba(245,158,11,0.35);
+            animation: pendingPulse 2.5s ease-in-out infinite;
+        }
+        .payment-dot.collected {
+            background: var(--success);
+            box-shadow: 0 0 10px rgba(52,211,153,0.35);
+            animation: none;
+        }
+        @keyframes pendingPulse {
+            0%, 100% { box-shadow: 0 0 8px rgba(245,158,11,0.25); }
+            50% { box-shadow: 0 0 18px rgba(245,158,11,0.5); }
+        }
+
+        /* ── Card Top Row ── */
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-identity {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .company-name {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .company-id {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--accent-soft);
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+
+        .card-financials {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .card-fin-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+        }
+        .card-fin-item .fin-amount {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            direction: ltr;
+        }
+        .card-fin-item.in .fin-amount { color: var(--success); }
+        .card-fin-item.out .fin-amount { color: var(--error); }
+        .card-fin-item .fin-tag {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .card-fin-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border);
+        }
+        .expand-chevron {
+            color: var(--text-muted);
+            transition: transform 0.3s var(--bounce);
+            margin-right: -6px;
+        }
+        .company-card.expanded .expand-chevron {
+            transform: rotate(180deg);
+        }
+
+        /* ── Card Meta Row ── */
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .meta-badge {
+            background: var(--accent-soft);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* ── Branch Section (expandable) ── */
+        .branch-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s var(--bounce), opacity 0.3s ease, margin 0.3s ease;
+            opacity: 0;
+            margin-top: 0;
+        }
+        .company-card.expanded .branch-section {
+            max-height: 3000px;
+            opacity: 1;
+            margin-top: 16px;
+        }
+        .branch-divider {
+            height: 1px;
+            background: var(--border);
+            margin-bottom: 14px;
+        }
+        .branch-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .branch-header h3 {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .branch-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            transition: all 0.3s var(--ease);
+        }
+        .branch-item:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-sm);
+        }
+        .branch-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .branch-identity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .branch-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .branch-id {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .branch-details {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .branch-detail {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .branch-detail .val {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            direction: ltr;
+        }
+        .branch-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Payment Toggle ── */
+        .pay-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-family: inherit;
+            color: var(--text-secondary);
+            transition: all 0.3s var(--bounce);
+        }
+        .pay-toggle:hover {
+            border-color: var(--success);
+            background: var(--success-soft);
+        }
+        .pay-toggle.collected {
+            border-color: var(--success);
+            background: var(--success-soft);
+            color: #047857;
+        }
+        .pay-toggle .toggle-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--warning);
+            transition: background 0.3s ease;
+        }
+        .pay-toggle.collected .toggle-dot {
+            background: var(--success);
+        }
+
+        .collection-date {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* ── Equipment in Branch ── */
+        .branch-equipment {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border);
+        }
+        .branch-equip-title {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .equip-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            margin: 2px 4px 2px 0;
+        }
+        .equip-tag .eq-cost {
+            font-family: 'Space Grotesk', sans-serif;
+            direction: ltr;
+        }
+
+        /* ── Equipment Tab ── */
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .equip-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s var(--bounce);
+        }
+        .equip-container:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .equip-container-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .equip-container-title {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .equip-container-count {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .equip-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        .equip-item:hover {
+            background: var(--accent-soft);
+        }
+        .equip-item-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .equip-item-id {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        .equip-item-cost {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            color: var(--accent);
+            direction: ltr;
+        }
+        .equip-item-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .equip-item:hover .equip-item-actions { opacity: 1; }
+
+        /* ── Buttons ── */
+        .btn {
+            padding: 8px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: all 0.3s var(--bounce);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn svg {
+            width: 16px; height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(205,63,32,0.2);
+        }
+        .btn-primary:hover {
+            background: var(--accent-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(205,63,32,0.3);
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 0.75rem;
+            border-radius: 8px;
+        }
+        .btn-icon {
+            width: 30px; height: 30px;
+            padding: 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+        .btn-icon:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+        .btn-icon.danger:hover {
+            background: rgba(248,113,113,0.1);
+            color: var(--error);
+        }
+        .btn-icon svg {
+            width: 16px; height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        /* ── Add Company Form ── */
+        .form-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 28px;
+            max-width: 560px;
+            box-shadow: var(--shadow-sm);
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            transition: all 0.3s ease;
+            outline: none;
+            direction: rtl;
+        }
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(205,63,32,0.1);
+        }
+        .form-input.ltr {
+            direction: ltr;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .form-input.error {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px rgba(248,113,113,0.1);
+            animation: shake 0.4s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+        .form-error {
+            font-size: 0.72rem;
+            color: var(--error);
+            margin-top: 4px;
+            display: none;
+        }
+        .form-error.show { display: block; }
+        .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(205,63,32,0.1);
+        }
+        .form-row {
+            display: flex;
+            gap: 14px;
+        }
+        .form-row .form-group { flex: 1; }
+
+        /* ── Modals ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45,32,25,0.4);
+            backdrop-filter: blur(6px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-box {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            padding: 28px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 20px 60px rgba(45,32,25,0.2);
+            animation: modalSlideIn 0.35s var(--bounce);
+        }
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state svg {
+            width: 48px; height: 48px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 1.2;
+            opacity: 0.4;
+            margin-bottom: 14px;
+        }
+        .empty-state p {
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--text-primary);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 200;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: transform 0.4s var(--bounce), opacity 0.3s ease;
+            opacity: 0;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* ── SAR Symbol ── */
+        .sar-sym {
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+        }
+        .sar-sym svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(205,63,32,0.15);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(205,63,32,0.3);
+        }
+
+        /* ── Date Input ── */
+        .date-input {
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.78rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            outline: none;
+            direction: ltr;
+        }
+        .date-input:focus {
+            border-color: var(--accent);
+        }
+
+        /* ── Equipment Assign Dropdown ── */
+        .equip-assign-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
+        }
+        .equip-assign-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .equip-assign-select {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.78rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles -->
+    <div class="particle-field" id="particleField"></div>
+
+    <div class="app-shell">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <svg viewBox="0 0 360 360" width="32" height="32">
+                    <path d="M0 0 C29.88 -0.87 60.75 11.18 83 31 C83.41 31.34 83.41 31.34 85.47 33.07 C96.72 42.72 105.86 54.03 113 67 C113.33 67.59 113.66 68.18 114 68.79 C124.79 88.3 131.96 110.53 131 133 C124.4 133 117.8 133 111 133 C110.77 130.42 110.55 127.84 110.31 125.19 C107.17 95.15 93.88 67.12 71 47 C51.1 30.88 28.64 22.04 3.08 20.25 C1 20 1 20 0 19 C-0.09 17.58 -0.11 16.16 -0.1 14.75 C-0.09 13.89 -0.09 13.04 -0.09 12.16 C-0.08 11.26 -0.07 10.36 -0.06 9.44 C-0.06 8.54 -0.05 7.63 -0.05 6.71 C-0.04 4.47 -0.02 2.24 0 0 Z " fill="#ffffff" transform="translate(194,39)"/>
+                    <path d="M0 0 C24.11 1.22 44.85 10.3 63 26 C63.34 26.29 63.34 26.29 65.07 27.77 C81.02 42.48 91.63 65.64 94 87 C94.12 90.67 94.05 94.32 94 98 C87.4 98 80.8 98 74 98 C73.75 95.63 73.5 93.26 73.25 90.81 C71.18 73.52 64.69 58.01 53 45 C52.74 44.69 52.74 44.69 51.43 43.15 C37.81 28.16 18.27 22.76 -1 20 C-1.03 16.85 -1.05 13.71 -1.06 10.56 C-1.07 9.66 -1.08 8.77 -1.09 7.84 C-1.09 6.99 -1.09 6.13 -1.1 5.25 C-1.1 4.86 -1.1 4.86 -1.11 2.86 C-1 1 -1 1 0 0 Z " fill="#ffffff" transform="translate(195,74)"/>
+                    <path d="M0 0 C0.03 7.53 0.04 15.06 0.05 22.59 C0.06 25.15 0.07 27.72 0.08 30.28 C0.09 33.96 0.09 37.63 0.1 41.31 C0.1 42.46 0.11 43.62 0.11 44.81 C0.11 45.87 0.11 46.93 0.11 48.02 C0.12 48.96 0.12 49.9 0.12 50.87 C0 53 0 53 -1 54 C-2.9 54.09 -4.81 54.12 -6.71 54.11 C-7.93 54.11 -9.16 54.11 -10.41 54.11 C-11.76 54.11 -13.1 54.1 -14.44 54.1 C-15.81 54.1 -17.17 54.09 -18.54 54.09 C-22.14 54.09 -25.74 54.08 -29.35 54.07 C-33.02 54.06 -36.69 54.05 -40.37 54.05 C-47.58 54.04 -54.79 54.02 -62 54 C-61.67 72.48 -61.34 90.96 -61 110 C-59.35 108.02 -57.7 106.04 -56 104 C-50.72 99.38 -45.68 96.83 -38.94 94.94 C-35.8 93.86 -35.8 93.86 -33 92 C-32.2 88.65 -32.2 88.65 -32.13 84.82 C-32.09 83.54 -32.05 82.27 -32.01 80.96 C-32.01 79.98 -32 79.01 -32 78 C-26.18 77.9 -20.37 77.83 -14.55 77.78 C-12.57 77.76 -10.6 77.73 -8.62 77.7 C-5.77 77.65 -2.92 77.63 -0.07 77.61 C0.81 77.59 1.68 77.57 2.58 77.55 C8.66 77.54 13.84 78.63 19 82 C22.2 85.91 23.33 89.58 23.06 94.62 C22.26 99.34 20.44 101.72 17 105 C11.76 108.67 4.41 108.12 -1.73 108.18 C-3.21 108.2 -4.69 108.22 -6.16 108.25 C-8.45 108.28 -10.74 108.31 -13.03 108.33 C-25.87 108.42 -37.29 109.78 -47 119 C-57.13 129.63 -61.39 143.52 -61.2 157.97 C-61.19 158.38 -61.19 158.38 -61.19 160.42 C-61.18 162.97 -61.15 165.52 -61.12 168.06 C-61.11 169.8 -61.11 171.55 -61.1 173.29 C-61.08 177.52 -61.04 181.76 -61 186 C-51.2 186.05 -41.4 186.08 -31.61 186.1 C-27.06 186.11 -22.5 186.13 -17.95 186.15 C-13.55 186.17 -9.15 186.18 -4.75 186.19 C-3.08 186.19 -1.41 186.2 0.26 186.21 C17.48 186.32 35.28 185.89 49 174 C55.72 165.99 58.48 157.23 57.79 146.85 C56.48 136.23 53.26 129.23 44.94 122.44 C42.71 120.79 40.45 119.3 38 118 C42.62 112.25 42.62 112.25 46 110 C48.94 109.75 48.94 109.75 52.57 109.74 C52.9 109.74 52.9 109.74 54.57 109.73 C56.76 109.72 58.95 109.73 61.13 109.73 C62.65 109.73 64.17 109.73 65.69 109.73 C68.87 109.73 72.04 109.73 75.22 109.74 C79.31 109.75 83.39 109.74 87.48 109.73 C90.61 109.72 93.74 109.73 96.87 109.73 C98.38 109.73 99.89 109.73 101.39 109.73 C103.49 109.72 105.59 109.73 107.69 109.74 C108.89 109.74 110.09 109.74 111.32 109.75 C112.2 109.83 113.09 109.91 114 110 C120.07 122.14 112.94 145.34 108.98 157.49 C107.03 163.19 104.72 168.63 102 174 C101.56 174.89 101.12 175.78 100.67 176.7 C87.08 202.97 62.37 224.41 34.2 233.75 C3.3 243.23 -28.17 240.62 -56.81 225.69 C-85.39 210.18 -104.86 184.61 -115 154 C-124.03 122.78 -119.84 89.36 -104.45 60.96 C-89.41 34.12 -64.69 13.15 -35.02 4.5 C-23.15 1.22 -12.36 -0.15 0 0 Z " fill="#ffffff" transform="translate(181,75)"/>
+                    <path d="M0 0 C17.67 0.84 30.46 6.67 43 19 C43.65 19.64 44.3 20.28 44.98 20.94 C54.97 31.5 59.88 46.57 60 61 C59 62 59 62 57.05 62.11 C56.22 62.11 55.39 62.1 54.53 62.1 C53.63 62.09 52.73 62.09 51.8 62.09 C51.33 62.08 51.33 62.08 48.94 62.06 C47.99 62.06 47.04 62.05 46.06 62.05 C43.71 62.04 41.35 62.02 39 62 C38.9 61.09 38.8 60.19 38.7 59.25 C37.8 51.88 36.77 45.46 33 39 C32.6 38.31 32.2 37.63 31.79 36.92 C24.24 25.51 12.6 22.69 0 20 C0 13.4 0 6.8 0 0 Z " fill="#ffffff" transform="translate(194,110)"/>
+                    <path d="M0 0 C0.79 -0.01 1.59 -0.01 2.4 -0.02 C4.08 -0.03 5.75 -0.03 7.43 -0.03 C9.96 -0.04 12.5 -0.08 15.04 -0.11 C24.68 -0.18 32.56 -0.06 40.23 6.46 C42.43 10.67 42.92 14.61 42.73 19.34 C41.04 24.62 38.13 27.2 33.73 30.34 C30.75 31.33 28.01 31.46 24.87 31.45 C23.91 31.45 22.95 31.45 21.96 31.45 C20.93 31.44 19.9 31.44 18.84 31.43 C17.78 31.43 16.72 31.43 15.63 31.43 C12.25 31.42 8.87 31.41 5.48 31.4 C3.19 31.39 0.9 31.39 -1.4 31.38 C-7.02 31.37 -12.64 31.36 -18.27 31.34 C-18.41 27.63 -18.5 23.92 -18.58 20.21 C-18.62 19.16 -18.66 18.12 -18.71 17.04 C-18.84 8.3 -18.84 8.3 -16.06 4.72 C-10.92 0.34 -6.59 0.02 0 0 Z " fill="#ffffff" transform="translate(167.265625,205.6640625)"/>
+                </svg>
+                <h1><span>Bajri</span> ERP</h1>
+            </div>
+            <div class="header-stats" id="headerStats"></div>
+        </header>
+
+        <div class="body-row">
+            <!-- Main Content -->
+            <main class="main-area">
+                <!-- Customers Tab -->
+                <div class="tab-content active" id="tabCustomers">
+                    <div class="section-title">
+                        <span class="accent-bar"></span>
+                        العملاء
+                    </div>
+                    <div class="financial-bar" id="financialBar"></div>
+                    <div class="company-list" id="companyList"></div>
+                </div>
+
+                <!-- Equipment Tab -->
+                <div class="tab-content" id="tabEquipment">
+                    <div class="section-title">
+                        <span class="accent-bar"></span>
+                        المعدات
+                    </div>
+                    <div class="equipment-grid" id="equipmentGrid"></div>
+                    <button class="btn btn-ghost" onclick="openCategoryModal()">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        إضافة فئة جديدة
+                    </button>
+                </div>
+
+                <!-- Add Company Tab -->
+                <div class="tab-content" id="tabAddCompany">
+                    <div class="section-title">
+                        <span class="accent-bar"></span>
+                        إضافة شركة
+                    </div>
+                    <div class="form-card" id="addCompanyForm"></div>
+                </div>
+            </main>
+
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <button class="sidebar-tab active" data-tab="tabCustomers" onclick="switchTab('tabCustomers', this)">
+                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span class="tooltip">العملاء</span>
+                </button>
+                <div class="sidebar-divider"></div>
+                <button class="sidebar-tab" data-tab="tabEquipment" onclick="switchTab('tabEquipment', this)">
+                    <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    <span class="tooltip">المعدات</span>
+                </button>
+                <div class="sidebar-divider"></div>
+                <button class="sidebar-tab" data-tab="tabAddCompany" onclick="switchTab('tabAddCompany', this)">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <span class="tooltip">إضافة شركة</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Branch Modal -->
+    <div class="modal-overlay" id="branchModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span class="modal-title" id="branchModalTitle">إضافة فرع</span>
+                <button class="btn-icon" onclick="closeModal('branchModal')">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div id="branchModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Equipment Item Modal -->
+    <div class="modal-overlay" id="equipModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span class="modal-title" id="equipModalTitle">إضافة معدة</span>
+                <button class="btn-icon" onclick="closeModal('equipModal')">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div id="equipModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span class="modal-title">إضافة فئة معدات</span>
+                <button class="btn-icon" onclick="closeModal('categoryModal')">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div id="categoryModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box" style="max-width: 360px; text-align: center;">
+            <p id="confirmMsg" style="margin-bottom: 20px; font-size: 0.95rem;"></p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn btn-ghost" onclick="closeModal('confirmModal')">إلغاء</button>
+                <button class="btn btn-primary" id="confirmBtn" style="background: var(--error);">تأكيد الحذف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+<script>
+// ── SAR Symbol SVG ──
+function sarSVG(size = 16, color = 'currentColor') {
+    return `<span class="sar-sym"><svg width="${size}" height="${size}" viewBox="0 0 1000 1000" fill="${color}" xmlns="http://www.w3.org/2000/svg">
+        <path d="M560.8 576.6c-44.4 0-78.2-10.6-101.4-31.6-23.2-21.2-34.8-52.4-34.8-93.8V163.6h72.8v285.8c0 26.4 7 46 20.8 58.8 14 12.8 34.4 19.2 61.2 19.2h32.2v49.2h-50.8zm-186-197.8h-72.6V163.6h72.6v215.2zm0 197.8h-72.6V439.4h72.6v137.2zM277.4 836.4H204V615.2l-90-69.6 44.6-57.8 118.8 91.8v256.8zm445-0H649.8V579.6l118.8-91.8 44.6 57.8-90 69.6v221.2z"/>
+    </svg></span>`;
+}
+
+function formatSAR(amount) {
+    const num = Number(amount) || 0;
+    const formatted = num.toLocaleString('en-US');
+    return `${formatted} ${sarSVG(14, '#6b5c4f')}`;
+}
+
+function formatSARColored(amount, color) {
+    const num = Number(amount) || 0;
+    const formatted = num.toLocaleString('en-US');
+    return `${formatted} ${sarSVG(14, color)}`;
+}
+
+// ── Data Layer ──
+const STORAGE_KEY = 'bajri_erp_data';
+
+function defaultData() {
+    return {
+        companies: [],
+        equipmentCategories: [
+            { id: 'cat-1', name: 'شاشات', items: [] },
+            { id: 'cat-2', name: 'طابعات', items: [] },
+            { id: 'cat-3', name: 'أجهزة شبكات', items: [] },
+            { id: 'cat-4', name: 'أخرى', items: [] }
+        ],
+        nextCompanyId: 1001
+    };
+}
+
+function getData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return defaultData();
+}
+
+function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+}
+
+// ── Tab Switching ──
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (tabId === 'tabAddCompany') renderAddCompanyForm();
+}
+
+// ── Toast ──
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Modal ──
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => {
+        if (e.target === m) m.classList.remove('active');
+    });
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+});
+
+// ── Financial Calculations ──
+function calcBranchInflow(branch) {
+    return (Number(branch.subscriptionAmount) || 0) + (Number(branch.foundationFee) || 0);
+}
+
+function calcCompanyInflow(company) {
+    return (company.branches || []).reduce((sum, b) => sum + calcBranchInflow(b), 0);
+}
+
+function calcBranchOutflow(branch, data) {
+    const allItems = (data.equipmentCategories || []).flatMap(c => c.items || []);
+    return (branch.assignedEquipment || []).reduce((sum, eqId) => {
+        const item = allItems.find(i => i.id === eqId);
+        return sum + (item ? Number(item.cost) || 0 : 0);
+    }, 0);
+}
+
+function calcCompanyOutflow(company, data) {
+    return (company.branches || []).reduce((sum, b) => sum + calcBranchOutflow(b, data), 0);
+}
+
+function isCompanyCollected(company) {
+    if (!company.branches || company.branches.length === 0) return false;
+    return company.branches.every(b => b.paymentCollected);
+}
+
+// ── Header Stats ──
+function renderHeaderStats() {
+    const data = getData();
+    let totalIn = 0, totalOut = 0;
+    data.companies.forEach(c => {
+        totalIn += calcCompanyInflow(c);
+        totalOut += calcCompanyOutflow(c, data);
+    });
+    document.getElementById('headerStats').innerHTML = `
+        <div class="header-stat">
+            <span class="label">تدفقات داخلية</span>
+            <span class="value">${totalIn.toLocaleString('en-US')}</span>
+            <span class="sar-icon">${sarSVG(13, 'rgba(255,255,255,0.8)')}</span>
+        </div>
+        <div class="header-stat">
+            <span class="label">تدفقات خارجية</span>
+            <span class="value">${totalOut.toLocaleString('en-US')}</span>
+            <span class="sar-icon">${sarSVG(13, 'rgba(255,255,255,0.8)')}</span>
+        </div>
+    `;
+}
+
+// ── Financial Bar ──
+function renderFinancialBar() {
+    const data = getData();
+    let totalIn = 0, totalOut = 0;
+    data.companies.forEach(c => {
+        totalIn += calcCompanyInflow(c);
+        totalOut += calcCompanyOutflow(c, data);
+    });
+    const net = totalIn - totalOut;
+    document.getElementById('financialBar').innerHTML = `
+        <div class="fin-card inflow">
+            <div class="fin-label">تدفقات داخلية</div>
+            <div class="fin-value">${formatSARColored(totalIn, '#34d399')}</div>
+        </div>
+        <div class="fin-card outflow">
+            <div class="fin-label">تدفقات خارجية</div>
+            <div class="fin-value">${formatSARColored(totalOut, '#f87171')}</div>
+        </div>
+        <div class="fin-card net">
+            <div class="fin-label">صافي</div>
+            <div class="fin-value">${formatSARColored(net, '#CD3F20')}</div>
+        </div>
+    `;
+}
+
+// ── Subscription Type Labels ──
+const subLabels = {
+    monthly: 'شهري',
+    quarterly: 'ربع سنوي',
+    yearly: 'سنوي'
+};
+
+// ── Company List Rendering ──
+function renderCompanyList() {
+    const data = getData();
+    const container = document.getElementById('companyList');
+
+    if (data.companies.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <p>لا توجد شركات بعد</p>
+                <button class="btn btn-primary" onclick="switchTab('tabAddCompany', document.querySelector('[data-tab=tabAddCompany]'))">
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    إضافة شركة
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = data.companies.map(c => {
+        const inflow = calcCompanyInflow(c);
+        const outflow = calcCompanyOutflow(c, data);
+        const collected = isCompanyCollected(c);
+        const branchCount = (c.branches || []).length;
+
+        return `
+            <div class="company-card" id="card-${c.id}" onclick="toggleExpand(${c.id}, event)">
+                <div class="payment-dot ${collected ? 'collected' : 'pending'}"></div>
+                <div class="card-top">
+                    <div class="card-identity">
+                        <span class="company-name">${esc(c.name)}</span>
+                        <span class="company-id">#${c.id}</span>
+                    </div>
+                    <div class="card-financials">
+                        <div class="card-fin-item in">
+                            <span class="fin-tag">تدفقات داخلية</span>
+                            <span class="fin-amount">${formatSARColored(inflow, '#34d399')}</span>
+                        </div>
+                        <div class="card-fin-divider"></div>
+                        <div class="card-fin-item out">
+                            <span class="fin-tag">تدفقات خارجية</span>
+                            <span class="fin-amount">${formatSARColored(outflow, '#f87171')}</span>
+                        </div>
+                        <svg class="expand-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                </div>
+                <div class="card-meta">
+                    <span class="meta-badge">${subLabels[c.defaultSubscriptionType] || c.defaultSubscriptionType}</span>
+                    <span>${branchCount} فرع</span>
+                    <span>رسوم تأسيس: ${formatSAR(c.defaultFoundationFee)}</span>
+                </div>
+                <div class="branch-section">
+                    <div class="branch-divider"></div>
+                    <div class="branch-header">
+                        <h3>الفروع</h3>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();openBranchModal(${c.id})">
+                                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                إضافة فرع
+                            </button>
+                            <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();confirmDelete('company',${c.id})" style="color:var(--error);border-color:rgba(248,113,113,0.3);">
+                                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                حذف الشركة
+                            </button>
+                        </div>
+                    </div>
+                    ${renderBranches(c, data)}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderBranches(company, data) {
+    if (!company.branches || company.branches.length === 0) {
+        return `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;">لا توجد فروع - أضف فرعاً جديداً</div>`;
+    }
+
+    return company.branches.map((b, idx) => {
+        const branchInflow = calcBranchInflow(b);
+        const branchOutflow = calcBranchOutflow(b, data);
+        const allItems = (data.equipmentCategories || []).flatMap(c => c.items || []);
+        const assignedItems = (b.assignedEquipment || []).map(eqId => allItems.find(i => i.id === eqId)).filter(Boolean);
+        const unassignedItems = allItems.filter(i => !(b.assignedEquipment || []).includes(i.id));
+
+        return `
+            <div class="branch-item" onclick="event.stopPropagation()">
+                <div class="branch-top">
+                    <div class="branch-identity">
+                        <span class="branch-name">${esc(b.name)}</span>
+                        <span class="branch-id">${esc(b.id)}</span>
+                    </div>
+                    <div class="branch-actions">
+                        <button class="pay-toggle ${b.paymentCollected ? 'collected' : ''}" onclick="togglePayment(${company.id}, ${idx})">
+                            <span class="toggle-dot"></span>
+                            ${b.paymentCollected ? 'تم التحصيل' : 'لم يتم التحصيل'}
+                        </button>
+                        <button class="btn-icon" onclick="openBranchModal(${company.id}, ${idx})" title="تعديل">
+                            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
+                        <button class="btn-icon danger" onclick="confirmDelete('branch',${company.id},${idx})" title="حذف">
+                            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="branch-details">
+                    <div class="branch-detail"><span>الاشتراك:</span> <span class="val">${formatSAR(b.subscriptionAmount)}</span></div>
+                    <div class="branch-detail"><span>النوع:</span> <span class="meta-badge">${subLabels[b.subscriptionType] || b.subscriptionType}</span></div>
+                    <div class="branch-detail"><span>رسوم تأسيس:</span> <span class="val">${formatSAR(b.foundationFee)}</span></div>
+                    <div class="branch-detail"><span>تدفقات داخلية:</span> <span class="val" style="color:var(--success)">${formatSARColored(branchInflow, '#34d399')}</span></div>
+                    <div class="branch-detail"><span>تدفقات خارجية:</span> <span class="val" style="color:var(--error)">${formatSARColored(branchOutflow, '#f87171')}</span></div>
+                </div>
+                ${b.paymentCollected && b.collectionDate ? `<div class="collection-date">تاريخ التحصيل: ${b.collectionDate}</div>` : ''}
+                ${b.paymentCollected ? '' : `
+                    <div style="margin-top:8px;">
+                        <label style="font-size:0.75rem;color:var(--text-muted);">تاريخ التحصيل:</label>
+                        <input type="date" class="date-input" id="date-${company.id}-${idx}" value="${b.collectionDate || ''}" onchange="setCollectionDate(${company.id},${idx},this.value)" onclick="event.stopPropagation()">
+                    </div>
+                `}
+                <div class="branch-equipment">
+                    <div class="branch-equip-title">المعدات المخصصة</div>
+                    ${assignedItems.length ? assignedItems.map(item => `
+                        <span class="equip-tag">
+                            ${esc(item.name)}
+                            <span class="eq-cost">${item.cost.toLocaleString('en-US')} ${sarSVG(11, '#CD3F20')}</span>
+                            <button class="btn-icon" style="width:18px;height:18px;margin-right:-4px;" onclick="unassignEquip(${company.id},${idx},'${item.id}')" title="إزالة">
+                                <svg viewBox="0 0 24 24" style="width:12px;height:12px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </span>
+                    `).join('') : '<span style="font-size:0.75rem;color:var(--text-muted);">لا توجد معدات</span>'}
+                    ${unassignedItems.length ? `
+                        <div class="equip-assign-row">
+                            <select class="equip-assign-select" id="assignSelect-${company.id}-${idx}" onclick="event.stopPropagation()">
+                                <option value="">اختر معدة...</option>
+                                ${unassignedItems.map(i => `<option value="${i.id}">${esc(i.name)} (${i.cost.toLocaleString('en-US')} ر.س)</option>`).join('')}
+                            </select>
+                            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();assignEquip(${company.id},${idx})">تخصيص</button>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ── Expand/Collapse ──
+function toggleExpand(companyId, event) {
+    if (event.target.closest('.branch-item') || event.target.closest('.btn') || event.target.closest('.btn-icon') || event.target.closest('.pay-toggle') || event.target.closest('select') || event.target.closest('input')) return;
+    const card = document.getElementById('card-' + companyId);
+    card.classList.toggle('expanded');
+}
+
+// ── Payment Toggle ──
+function togglePayment(companyId, branchIdx) {
+    const data = getData();
+    const company = data.companies.find(c => c.id === companyId);
+    if (!company || !company.branches[branchIdx]) return;
+    const branch = company.branches[branchIdx];
+    branch.paymentCollected = !branch.paymentCollected;
+    if (branch.paymentCollected && !branch.collectionDate) {
+        branch.collectionDate = new Date().toISOString().split('T')[0];
+    }
+    if (!branch.paymentCollected) {
+        branch.collectionDate = null;
+    }
+    saveData(data);
+    renderAll();
+    showToast(branch.paymentCollected ? 'تم تسجيل التحصيل' : 'تم إلغاء التحصيل');
+}
+
+function setCollectionDate(companyId, branchIdx, date) {
+    const data = getData();
+    const company = data.companies.find(c => c.id === companyId);
+    if (!company || !company.branches[branchIdx]) return;
+    company.branches[branchIdx].collectionDate = date;
+    saveData(data);
+}
+
+// ── Equipment Assignment ──
+function assignEquip(companyId, branchIdx) {
+    const sel = document.getElementById(`assignSelect-${companyId}-${branchIdx}`);
+    if (!sel || !sel.value) return;
+    const data = getData();
+    const company = data.companies.find(c => c.id === companyId);
+    if (!company || !company.branches[branchIdx]) return;
+    if (!company.branches[branchIdx].assignedEquipment) company.branches[branchIdx].assignedEquipment = [];
+    company.branches[branchIdx].assignedEquipment.push(sel.value);
+    saveData(data);
+    renderAll();
+    showToast('تم تخصيص المعدة');
+}
+
+function unassignEquip(companyId, branchIdx, equipId) {
+    const data = getData();
+    const company = data.companies.find(c => c.id === companyId);
+    if (!company || !company.branches[branchIdx]) return;
+    company.branches[branchIdx].assignedEquipment = (company.branches[branchIdx].assignedEquipment || []).filter(id => id !== equipId);
+    saveData(data);
+    renderAll();
+    showToast('تم إزالة المعدة');
+}
+
+// ── Branch Modal ──
+function openBranchModal(companyId, branchIdx) {
+    const data = getData();
+    const company = data.companies.find(c => c.id === companyId);
+    if (!company) return;
+    const isEdit = branchIdx !== undefined;
+    const branch = isEdit ? company.branches[branchIdx] : null;
+
+    document.getElementById('branchModalTitle').textContent = isEdit ? 'تعديل الفرع' : 'إضافة فرع';
+
+    const nextBranchNum = (company.branches || []).length + 1;
+    const defaultBranchId = `b-${companyId}-${nextBranchNum}`;
+
+    document.getElementById('branchModalBody').innerHTML = `
+        <div class="form-group">
+            <label class="form-label">اسم الفرع</label>
+            <input class="form-input" id="branchName" value="${isEdit ? esc(branch.name) : ''}" placeholder="مثال: الفرع الرئيسي">
+        </div>
+        <div class="form-group">
+            <label class="form-label">رقم الفرع</label>
+            <input class="form-input ltr" id="branchId" value="${isEdit ? esc(branch.id) : defaultBranchId}" placeholder="${defaultBranchId}">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">مبلغ الاشتراك</label>
+                <input class="form-input ltr" type="number" id="branchAmount" value="${isEdit ? branch.subscriptionAmount : company.defaultSubscriptionAmount}" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">نوع الاشتراك</label>
+                <select class="form-select" id="branchSubType">
+                    <option value="monthly" ${(isEdit ? branch.subscriptionType : company.defaultSubscriptionType) === 'monthly' ? 'selected' : ''}>شهري</option>
+                    <option value="quarterly" ${(isEdit ? branch.subscriptionType : company.defaultSubscriptionType) === 'quarterly' ? 'selected' : ''}>ربع سنوي</option>
+                    <option value="yearly" ${(isEdit ? branch.subscriptionType : company.defaultSubscriptionType) === 'yearly' ? 'selected' : ''}>سنوي</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">رسوم التأسيس</label>
+            <input class="form-input ltr" type="number" id="branchFee" value="${isEdit ? branch.foundationFee : company.defaultFoundationFee}" placeholder="0">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px;">
+            <button class="btn btn-primary" onclick="saveBranch(${companyId}, ${isEdit ? branchIdx : -1})">
+                ${isEdit ? 'حفظ التعديلات' : 'إضافة الفرع'}
+            </button>
+            <button class="btn btn-ghost" onclick="closeModal('branchModal')">إلغاء</button>
+        </div>
+    `;
+    openModal('branchModal');
+}
+
+function saveBranch(companyId, branchIdx) {
+    const name = document.getElementById('branchName').value.trim();
+    const id = document.getElementById('branchId').value.trim();
+    const amount = Number(document.getElementById('branchAmount').value);
+    const subType = document.getElementById('branchSubType').value;
+    const fee = Number(document.getElementById('branchFee').value);
+
+    if (!name) { document.getElementById('branchName').classList.add('error'); setTimeout(() => document.getElementById('branchName').classList.remove('error'), 1500); return; }
+    if (!id) { document.getElementById('branchId').classList.add('error'); setTimeout(() => document.getElementById('branchId').classList.remove('error'), 1500); return; }
+
+    const data = getData();
+    const company = data.companies.find(c => c.id === companyId);
+    if (!company) return;
+    if (!company.branches) company.branches = [];
+
+    if (branchIdx >= 0) {
+        const existing = company.branches[branchIdx];
+        existing.name = name;
+        existing.id = id;
+        existing.subscriptionAmount = amount;
+        existing.subscriptionType = subType;
+        existing.foundationFee = fee;
+    } else {
+        company.branches.push({
+            id: id,
+            name: name,
+            subscriptionType: subType,
+            subscriptionAmount: amount,
+            foundationFee: fee,
+            paymentCollected: false,
+            collectionDate: null,
+            assignedEquipment: []
+        });
+    }
+
+    saveData(data);
+    closeModal('branchModal');
+    renderAll();
+    showToast(branchIdx >= 0 ? 'تم تعديل الفرع' : 'تم إضافة الفرع');
+}
+
+// ── Equipment Tab ──
+function renderEquipmentTab() {
+    const data = getData();
+    const grid = document.getElementById('equipmentGrid');
+
+    grid.innerHTML = data.equipmentCategories.map(cat => `
+        <div class="equip-container">
+            <div class="equip-container-header">
+                <span class="equip-container-title">${esc(cat.name)}</span>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <span class="equip-container-count">${(cat.items || []).length}</span>
+                    <button class="btn-icon" onclick="editCategory('${cat.id}')" title="تعديل">
+                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="btn-icon danger" onclick="confirmDelete('category','${cat.id}')" title="حذف">
+                        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            </div>
+            ${(cat.items || []).length === 0 ? '<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:0.78rem;">لا توجد معدات</div>' :
+            (cat.items || []).map((item, idx) => `
+                <div class="equip-item">
+                    <div class="equip-item-info">
+                        <span>${esc(item.name)}</span>
+                        <span class="equip-item-id">#${esc(item.id)}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="equip-item-cost">${formatSARColored(item.cost, '#CD3F20')}</span>
+                        <div class="equip-item-actions">
+                            <button class="btn-icon" onclick="openEquipModal('${cat.id}', ${idx})" title="تعديل">
+                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
+                            <button class="btn-icon danger" onclick="confirmDelete('equip','${cat.id}',${idx})" title="حذف">
+                                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+            <button class="btn btn-sm btn-ghost" style="width:100%;margin-top:8px;" onclick="openEquipModal('${cat.id}')">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                إضافة معدة
+            </button>
+        </div>
+    `).join('');
+}
+
+// ── Equipment Modal ──
+function openEquipModal(catId, itemIdx) {
+    const data = getData();
+    const cat = data.equipmentCategories.find(c => c.id === catId);
+    if (!cat) return;
+    const isEdit = itemIdx !== undefined;
+    const item = isEdit ? cat.items[itemIdx] : null;
+
+    document.getElementById('equipModalTitle').textContent = isEdit ? 'تعديل المعدة' : 'إضافة معدة';
+
+    const nextId = `eq-${Date.now().toString(36)}`;
+
+    document.getElementById('equipModalBody').innerHTML = `
+        <div class="form-group">
+            <label class="form-label">اسم المعدة</label>
+            <input class="form-input" id="equipName" value="${isEdit ? esc(item.name) : ''}" placeholder="مثال: شاشة سامسونج 55 بوصة">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">رقم المعدة</label>
+                <input class="form-input ltr" id="equipId" value="${isEdit ? esc(item.id) : nextId}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">التكلفة (ر.س)</label>
+                <input class="form-input ltr" type="number" id="equipCost" value="${isEdit ? item.cost : ''}" placeholder="0">
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px;">
+            <button class="btn btn-primary" onclick="saveEquipItem('${catId}', ${isEdit ? itemIdx : -1})">
+                ${isEdit ? 'حفظ التعديلات' : 'إضافة المعدة'}
+            </button>
+            <button class="btn btn-ghost" onclick="closeModal('equipModal')">إلغاء</button>
+        </div>
+    `;
+    openModal('equipModal');
+}
+
+function saveEquipItem(catId, itemIdx) {
+    const name = document.getElementById('equipName').value.trim();
+    const id = document.getElementById('equipId').value.trim();
+    const cost = Number(document.getElementById('equipCost').value);
+
+    if (!name) { document.getElementById('equipName').classList.add('error'); setTimeout(() => document.getElementById('equipName').classList.remove('error'), 1500); return; }
+    if (!id) { document.getElementById('equipId').classList.add('error'); setTimeout(() => document.getElementById('equipId').classList.remove('error'), 1500); return; }
+
+    const data = getData();
+    const cat = data.equipmentCategories.find(c => c.id === catId);
+    if (!cat) return;
+    if (!cat.items) cat.items = [];
+
+    if (itemIdx >= 0) {
+        cat.items[itemIdx] = { id, name, cost };
+    } else {
+        cat.items.push({ id, name, cost });
+    }
+
+    saveData(data);
+    closeModal('equipModal');
+    renderAll();
+    showToast(itemIdx >= 0 ? 'تم تعديل المعدة' : 'تم إضافة المعدة');
+}
+
+// ── Category Modal ──
+function openCategoryModal() {
+    document.getElementById('categoryModalBody').innerHTML = `
+        <div class="form-group">
+            <label class="form-label">اسم الفئة</label>
+            <input class="form-input" id="catName" placeholder="مثال: كاميرات">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px;">
+            <button class="btn btn-primary" onclick="saveCategory()">إضافة الفئة</button>
+            <button class="btn btn-ghost" onclick="closeModal('categoryModal')">إلغاء</button>
+        </div>
+    `;
+    openModal('categoryModal');
+}
+
+function editCategory(catId) {
+    const data = getData();
+    const cat = data.equipmentCategories.find(c => c.id === catId);
+    if (!cat) return;
+    document.getElementById('categoryModalBody').innerHTML = `
+        <div class="form-group">
+            <label class="form-label">اسم الفئة</label>
+            <input class="form-input" id="catName" value="${esc(cat.name)}">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px;">
+            <button class="btn btn-primary" onclick="updateCategory('${catId}')">حفظ التعديلات</button>
+            <button class="btn btn-ghost" onclick="closeModal('categoryModal')">إلغاء</button>
+        </div>
+    `;
+    openModal('categoryModal');
+}
+
+function saveCategory() {
+    const name = document.getElementById('catName').value.trim();
+    if (!name) { document.getElementById('catName').classList.add('error'); setTimeout(() => document.getElementById('catName').classList.remove('error'), 1500); return; }
+    const data = getData();
+    data.equipmentCategories.push({ id: 'cat-' + Date.now().toString(36), name, items: [] });
+    saveData(data);
+    closeModal('categoryModal');
+    renderAll();
+    showToast('تم إضافة الفئة');
+}
+
+function updateCategory(catId) {
+    const name = document.getElementById('catName').value.trim();
+    if (!name) return;
+    const data = getData();
+    const cat = data.equipmentCategories.find(c => c.id === catId);
+    if (cat) cat.name = name;
+    saveData(data);
+    closeModal('categoryModal');
+    renderAll();
+    showToast('تم تعديل الفئة');
+}
+
+// ── Add Company Form ──
+function renderAddCompanyForm() {
+    const data = getData();
+    const form = document.getElementById('addCompanyForm');
+
+    form.innerHTML = `
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">رقم الشركة</label>
+                <input class="form-input ltr" type="number" id="companyId" value="${data.nextCompanyId}" placeholder="${data.nextCompanyId}">
+                <div class="form-error" id="idError">رقم الشركة مستخدم بالفعل</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">اسم الشركة</label>
+                <input class="form-input" id="companyName" placeholder="مثال: مجموعة الفيصل">
+                <div class="form-error" id="nameError">يرجى إدخال اسم الشركة</div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">مبلغ الاشتراك الافتراضي</label>
+                <input class="form-input ltr" type="number" id="companyAmount" placeholder="0">
+                <div class="form-error" id="amountError">يرجى إدخال مبلغ الاشتراك</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">نوع الاشتراك</label>
+                <select class="form-select" id="companySubType">
+                    <option value="monthly">شهري</option>
+                    <option value="quarterly">ربع سنوي</option>
+                    <option value="yearly">سنوي</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">رسوم التأسيس</label>
+            <input class="form-input ltr" type="number" id="companyFee" placeholder="0">
+            <div class="form-error" id="feeError">يرجى إدخال رسوم التأسيس</div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:8px;" onclick="addCompany()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            إضافة الشركة
+        </button>
+    `;
+}
+
+function showFieldError(fieldId, errorId) {
+    document.getElementById(fieldId).classList.add('error');
+    document.getElementById(errorId).classList.add('show');
+    setTimeout(() => {
+        document.getElementById(fieldId).classList.remove('error');
+        document.getElementById(errorId).classList.remove('show');
+    }, 2000);
+}
+
+function addCompany() {
+    const id = Number(document.getElementById('companyId').value);
+    const name = document.getElementById('companyName').value.trim();
+    const amount = Number(document.getElementById('companyAmount').value);
+    const subType = document.getElementById('companySubType').value;
+    const fee = Number(document.getElementById('companyFee').value);
+
+    let valid = true;
+
+    if (!name) { showFieldError('companyName', 'nameError'); valid = false; }
+    if (!amount) { showFieldError('companyAmount', 'amountError'); valid = false; }
+    if (!fee && fee !== 0) { showFieldError('companyFee', 'feeError'); valid = false; }
+
+    const data = getData();
+    if (data.companies.some(c => c.id === id)) {
+        showFieldError('companyId', 'idError');
+        valid = false;
+    }
+
+    if (!valid) return;
+
+    data.companies.push({
+        id: id,
+        name: name,
+        defaultSubscriptionAmount: amount,
+        defaultSubscriptionType: subType,
+        defaultFoundationFee: fee,
+        branches: []
+    });
+
+    if (id >= data.nextCompanyId) {
+        data.nextCompanyId = id + 1;
+    }
+
+    saveData(data);
+    renderAll();
+    switchTab('tabCustomers', document.querySelector('[data-tab=tabCustomers]'));
+    showToast('تم إضافة الشركة بنجاح');
+}
+
+// ── Delete Confirmation ──
+let pendingDelete = null;
+
+function confirmDelete(type, ...args) {
+    pendingDelete = { type, args };
+    let msg = '';
+    if (type === 'company') msg = 'هل أنت متأكد من حذف هذه الشركة وجميع فروعها؟';
+    else if (type === 'branch') msg = 'هل أنت متأكد من حذف هذا الفرع؟';
+    else if (type === 'category') msg = 'هل أنت متأكد من حذف هذه الفئة وجميع معداتها؟';
+    else if (type === 'equip') msg = 'هل أنت متأكد من حذف هذه المعدة؟';
+
+    document.getElementById('confirmMsg').textContent = msg;
+    document.getElementById('confirmBtn').onclick = executeDelete;
+    openModal('confirmModal');
+}
+
+function executeDelete() {
+    if (!pendingDelete) return;
+    const data = getData();
+    const { type, args } = pendingDelete;
+
+    if (type === 'company') {
+        data.companies = data.companies.filter(c => c.id !== args[0]);
+    } else if (type === 'branch') {
+        const company = data.companies.find(c => c.id === args[0]);
+        if (company) company.branches.splice(args[1], 1);
+    } else if (type === 'category') {
+        data.equipmentCategories = data.equipmentCategories.filter(c => c.id !== args[0]);
+    } else if (type === 'equip') {
+        const cat = data.equipmentCategories.find(c => c.id === args[0]);
+        if (cat) cat.items.splice(args[1], 1);
+    }
+
+    saveData(data);
+    closeModal('confirmModal');
+    renderAll();
+    pendingDelete = null;
+    showToast('تم الحذف بنجاح');
+}
+
+// ── Particles ──
+function spawnParticles() {
+    const field = document.getElementById('particleField');
+    for (let i = 0; i < 30; i++) {
+        const el = document.createElement('div');
+        el.className = Math.random() > 0.7 ? 'px-diamond' : 'px-dot';
+        el.style.left = Math.random() * 100 + '%';
+        el.style.top = Math.random() * 100 + '%';
+        el.style.animationDelay = (Math.random() * 8) + 's';
+        field.appendChild(el);
+    }
+}
+
+// ── Render All ──
+function renderAll() {
+    const expandedCards = [...document.querySelectorAll('.company-card.expanded')].map(c => c.id.replace('card-', ''));
+    renderHeaderStats();
+    renderFinancialBar();
+    renderCompanyList();
+    renderEquipmentTab();
+    expandedCards.forEach(id => {
+        const card = document.getElementById('card-' + id);
+        if (card) card.classList.add('expanded');
+    });
+}
+
+// ── Init ──
+function init() {
+    spawnParticles();
+    renderAll();
+    renderAddCompanyForm();
+}
+
+init();
+</script>
+</body>
+</html>
