@@ -1092,7 +1092,17 @@
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ── Supabase Init ──
+const SUPABASE_URL = 'https://geyzrkazhnbecxayunzq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdleXpya2F6aG5iZWN4YXl1bnpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNzMzNzEsImV4cCI6MjA5Nzg0OTM3MX0.GXT6zoW7WLb0c1VcFwRpmCbpJx11AHXFM8USuGQ62UM';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let appData = { companies: [], equipmentCategories: [] };
+
+const catNameMap = { screens: 'شاشات', printers: 'طابعات', network: 'أجهزة شبكات', other: 'أخرى' };
+
 // ── SAR Symbol SVG ──
 function sarSVG(size = 16, color = 'currentColor') {
     return `<span class="sar-sym"><svg width="${size}" height="${size}" viewBox="0 0 1000 1000" fill="${color}" xmlns="http://www.w3.org/2000/svg">
@@ -1102,48 +1112,70 @@ function sarSVG(size = 16, color = 'currentColor') {
 
 function formatSAR(amount) {
     const num = Number(amount) || 0;
-    const formatted = num.toLocaleString('en-US');
-    return `${formatted} ${sarSVG(14, '#6b5c4f')}`;
+    return `${num.toLocaleString('en-US')} ${sarSVG(14, '#6b5c4f')}`;
 }
 
 function formatSARColored(amount, color) {
     const num = Number(amount) || 0;
-    const formatted = num.toLocaleString('en-US');
-    return `${formatted} ${sarSVG(14, color)}`;
-}
-
-// ── Data Layer ──
-const STORAGE_KEY = 'bajri_erp_data';
-
-function defaultData() {
-    return {
-        companies: [],
-        equipmentCategories: [
-            { id: 'cat-1', name: 'شاشات', items: [] },
-            { id: 'cat-2', name: 'طابعات', items: [] },
-            { id: 'cat-3', name: 'أجهزة شبكات', items: [] },
-            { id: 'cat-4', name: 'أخرى', items: [] }
-        ],
-        nextCompanyId: 1001
-    };
-}
-
-function getData() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
-    } catch (e) {}
-    return defaultData();
-}
-
-function saveData(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return `${num.toLocaleString('en-US')} ${sarSVG(14, color)}`;
 }
 
 function esc(str) {
     const d = document.createElement('div');
-    d.textContent = str;
+    d.textContent = str || '';
     return d.innerHTML;
+}
+
+// ── Fetch All Data from Supabase ──
+async function fetchAllData() {
+    const [companiesRes, branchesRes, catsRes, itemsRes, assignRes] = await Promise.all([
+        sb.from('companies').select('*').order('id'),
+        sb.from('branches').select('*').order('created_at'),
+        sb.from('equipment_categories').select('*').order('created_at'),
+        sb.from('equipment_items').select('*').order('created_at'),
+        sb.from('branch_equipment').select('*')
+    ]);
+
+    const companies = (companiesRes.data || []).map(c => ({
+        id: c.id,
+        name: c.name,
+        defaultSubscriptionAmount: Number(c.default_subscription_amount),
+        defaultSubscriptionType: c.default_subscription_type,
+        defaultFoundationFee: Number(c.default_foundation_fee),
+        branches: []
+    }));
+
+    const assignments = assignRes.data || [];
+
+    (branchesRes.data || []).forEach(b => {
+        const company = companies.find(c => c.id === b.company_id);
+        if (!company) return;
+        const branchEquipIds = assignments.filter(a => a.branch_id === b.id).map(a => a.equipment_id);
+        company.branches.push({
+            id: b.display_id || b.id,
+            dbId: b.id,
+            name: b.name,
+            subscriptionType: b.subscription_type,
+            subscriptionAmount: Number(b.subscription_amount),
+            foundationFee: Number(b.foundation_fee),
+            paymentCollected: b.payment_collected,
+            collectionDate: b.collection_date,
+            assignedEquipment: branchEquipIds
+        });
+    });
+
+    const equipmentCategories = (catsRes.data || []).map(cat => ({
+        id: cat.id,
+        name: catNameMap[cat.name] || cat.name,
+        items: (itemsRes.data || []).filter(i => i.category_id === cat.id).map(i => ({
+            id: i.id,
+            name: i.name,
+            cost: Number(i.cost)
+        }))
+    }));
+
+    appData = { companies, equipmentCategories };
+    return appData;
 }
 
 // ── Tab Switching ──
@@ -1168,9 +1200,7 @@ function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
 document.querySelectorAll('.modal-overlay').forEach(m => {
-    m.addEventListener('click', e => {
-        if (e.target === m) m.classList.remove('active');
-    });
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
 });
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
@@ -1180,36 +1210,30 @@ document.addEventListener('keydown', e => {
 function calcBranchInflow(branch) {
     return (Number(branch.subscriptionAmount) || 0) + (Number(branch.foundationFee) || 0);
 }
-
 function calcCompanyInflow(company) {
     return (company.branches || []).reduce((sum, b) => sum + calcBranchInflow(b), 0);
 }
-
-function calcBranchOutflow(branch, data) {
-    const allItems = (data.equipmentCategories || []).flatMap(c => c.items || []);
+function calcBranchOutflow(branch) {
+    const allItems = appData.equipmentCategories.flatMap(c => c.items || []);
     return (branch.assignedEquipment || []).reduce((sum, eqId) => {
         const item = allItems.find(i => i.id === eqId);
         return sum + (item ? Number(item.cost) || 0 : 0);
     }, 0);
 }
-
-function calcCompanyOutflow(company, data) {
-    return (company.branches || []).reduce((sum, b) => sum + calcBranchOutflow(b, data), 0);
+function calcCompanyOutflow(company) {
+    return (company.branches || []).reduce((sum, b) => sum + calcBranchOutflow(b), 0);
 }
-
 function isCompanyCollected(company) {
     if (!company.branches || company.branches.length === 0) return false;
     return company.branches.every(b => b.paymentCollected);
 }
 
-// ── Header Stats ──
+const subLabels = { monthly: 'شهري', quarterly: 'ربع سنوي', yearly: 'سنوي' };
+
+// ── Render Header Stats ──
 function renderHeaderStats() {
-    const data = getData();
     let totalIn = 0, totalOut = 0;
-    data.companies.forEach(c => {
-        totalIn += calcCompanyInflow(c);
-        totalOut += calcCompanyOutflow(c, data);
-    });
+    appData.companies.forEach(c => { totalIn += calcCompanyInflow(c); totalOut += calcCompanyOutflow(c); });
     document.getElementById('headerStats').innerHTML = `
         <div class="header-stat">
             <span class="label">تدفقات داخلية</span>
@@ -1224,14 +1248,10 @@ function renderHeaderStats() {
     `;
 }
 
-// ── Financial Bar ──
+// ── Render Financial Bar ──
 function renderFinancialBar() {
-    const data = getData();
     let totalIn = 0, totalOut = 0;
-    data.companies.forEach(c => {
-        totalIn += calcCompanyInflow(c);
-        totalOut += calcCompanyOutflow(c, data);
-    });
+    appData.companies.forEach(c => { totalIn += calcCompanyInflow(c); totalOut += calcCompanyOutflow(c); });
     const net = totalIn - totalOut;
     document.getElementById('financialBar').innerHTML = `
         <div class="fin-card inflow">
@@ -1249,19 +1269,10 @@ function renderFinancialBar() {
     `;
 }
 
-// ── Subscription Type Labels ──
-const subLabels = {
-    monthly: 'شهري',
-    quarterly: 'ربع سنوي',
-    yearly: 'سنوي'
-};
-
-// ── Company List Rendering ──
+// ── Render Company List ──
 function renderCompanyList() {
-    const data = getData();
     const container = document.getElementById('companyList');
-
-    if (data.companies.length === 0) {
+    if (appData.companies.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -1270,17 +1281,15 @@ function renderCompanyList() {
                     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     إضافة شركة
                 </button>
-            </div>
-        `;
+            </div>`;
         return;
     }
 
-    container.innerHTML = data.companies.map(c => {
+    container.innerHTML = appData.companies.map(c => {
         const inflow = calcCompanyInflow(c);
-        const outflow = calcCompanyOutflow(c, data);
+        const outflow = calcCompanyOutflow(c);
         const collected = isCompanyCollected(c);
         const branchCount = (c.branches || []).length;
-
         return `
             <div class="company-card" id="card-${c.id}" onclick="toggleExpand(${c.id}, event)">
                 <div class="payment-dot ${collected ? 'collected' : 'pending'}"></div>
@@ -1322,22 +1331,21 @@ function renderCompanyList() {
                             </button>
                         </div>
                     </div>
-                    ${renderBranches(c, data)}
+                    ${renderBranches(c)}
                 </div>
-            </div>
-        `;
+            </div>`;
     }).join('');
 }
 
-function renderBranches(company, data) {
+function renderBranches(company) {
     if (!company.branches || company.branches.length === 0) {
         return `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;">لا توجد فروع - أضف فرعاً جديداً</div>`;
     }
+    const allItems = appData.equipmentCategories.flatMap(c => c.items || []);
 
     return company.branches.map((b, idx) => {
         const branchInflow = calcBranchInflow(b);
-        const branchOutflow = calcBranchOutflow(b, data);
-        const allItems = (data.equipmentCategories || []).flatMap(c => c.items || []);
+        const branchOutflow = calcBranchOutflow(b);
         const assignedItems = (b.assignedEquipment || []).map(eqId => allItems.find(i => i.id === eqId)).filter(Boolean);
         const unassignedItems = allItems.filter(i => !(b.assignedEquipment || []).includes(i.id));
 
@@ -1349,14 +1357,14 @@ function renderBranches(company, data) {
                         <span class="branch-id">${esc(b.id)}</span>
                     </div>
                     <div class="branch-actions">
-                        <button class="pay-toggle ${b.paymentCollected ? 'collected' : ''}" onclick="togglePayment(${company.id}, ${idx})">
+                        <button class="pay-toggle ${b.paymentCollected ? 'collected' : ''}" onclick="togglePayment('${b.dbId}', ${b.paymentCollected ? 'true' : 'false'})">
                             <span class="toggle-dot"></span>
                             ${b.paymentCollected ? 'تم التحصيل' : 'لم يتم التحصيل'}
                         </button>
                         <button class="btn-icon" onclick="openBranchModal(${company.id}, ${idx})" title="تعديل">
                             <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         </button>
-                        <button class="btn-icon danger" onclick="confirmDelete('branch',${company.id},${idx})" title="حذف">
+                        <button class="btn-icon danger" onclick="confirmDelete('branch','${b.dbId}')" title="حذف">
                             <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         </button>
                     </div>
@@ -1372,104 +1380,78 @@ function renderBranches(company, data) {
                 ${b.paymentCollected ? '' : `
                     <div style="margin-top:8px;">
                         <label style="font-size:0.75rem;color:var(--text-muted);">تاريخ التحصيل:</label>
-                        <input type="date" class="date-input" id="date-${company.id}-${idx}" value="${b.collectionDate || ''}" onchange="setCollectionDate(${company.id},${idx},this.value)" onclick="event.stopPropagation()">
-                    </div>
-                `}
+                        <input type="date" class="date-input" value="${b.collectionDate || ''}" onchange="setCollectionDate('${b.dbId}',this.value)" onclick="event.stopPropagation()">
+                    </div>`}
                 <div class="branch-equipment">
                     <div class="branch-equip-title">المعدات المخصصة</div>
                     ${assignedItems.length ? assignedItems.map(item => `
                         <span class="equip-tag">
                             ${esc(item.name)}
                             <span class="eq-cost">${item.cost.toLocaleString('en-US')} ${sarSVG(11, '#CD3F20')}</span>
-                            <button class="btn-icon" style="width:18px;height:18px;margin-right:-4px;" onclick="unassignEquip(${company.id},${idx},'${item.id}')" title="إزالة">
+                            <button class="btn-icon" style="width:18px;height:18px;margin-right:-4px;" onclick="unassignEquip('${b.dbId}','${item.id}')" title="إزالة">
                                 <svg viewBox="0 0 24 24" style="width:12px;height:12px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                             </button>
                         </span>
                     `).join('') : '<span style="font-size:0.75rem;color:var(--text-muted);">لا توجد معدات</span>'}
                     ${unassignedItems.length ? `
                         <div class="equip-assign-row">
-                            <select class="equip-assign-select" id="assignSelect-${company.id}-${idx}" onclick="event.stopPropagation()">
+                            <select class="equip-assign-select" id="assignSelect-${b.dbId}" onclick="event.stopPropagation()">
                                 <option value="">اختر معدة...</option>
                                 ${unassignedItems.map(i => `<option value="${i.id}">${esc(i.name)} (${i.cost.toLocaleString('en-US')} ر.س)</option>`).join('')}
                             </select>
-                            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();assignEquip(${company.id},${idx})">تخصيص</button>
-                        </div>
-                    ` : ''}
+                            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();assignEquip('${b.dbId}')">تخصيص</button>
+                        </div>` : ''}
                 </div>
-            </div>
-        `;
+            </div>`;
     }).join('');
 }
 
 // ── Expand/Collapse ──
 function toggleExpand(companyId, event) {
     if (event.target.closest('.branch-item') || event.target.closest('.btn') || event.target.closest('.btn-icon') || event.target.closest('.pay-toggle') || event.target.closest('select') || event.target.closest('input')) return;
-    const card = document.getElementById('card-' + companyId);
-    card.classList.toggle('expanded');
+    document.getElementById('card-' + companyId).classList.toggle('expanded');
 }
 
-// ── Payment Toggle ──
-function togglePayment(companyId, branchIdx) {
-    const data = getData();
-    const company = data.companies.find(c => c.id === companyId);
-    if (!company || !company.branches[branchIdx]) return;
-    const branch = company.branches[branchIdx];
-    branch.paymentCollected = !branch.paymentCollected;
-    if (branch.paymentCollected && !branch.collectionDate) {
-        branch.collectionDate = new Date().toISOString().split('T')[0];
-    }
-    if (!branch.paymentCollected) {
-        branch.collectionDate = null;
-    }
-    saveData(data);
-    renderAll();
-    showToast(branch.paymentCollected ? 'تم تسجيل التحصيل' : 'تم إلغاء التحصيل');
+// ── Payment Toggle (Supabase) ──
+async function togglePayment(branchDbId, currentState) {
+    const newState = !currentState;
+    const updates = { payment_collected: newState };
+    if (newState) updates.collection_date = new Date().toISOString().split('T')[0];
+    else updates.collection_date = null;
+    await sb.from('branches').update(updates).eq('id', branchDbId);
+    await renderAll();
+    showToast(newState ? 'تم تسجيل التحصيل' : 'تم إلغاء التحصيل');
 }
 
-function setCollectionDate(companyId, branchIdx, date) {
-    const data = getData();
-    const company = data.companies.find(c => c.id === companyId);
-    if (!company || !company.branches[branchIdx]) return;
-    company.branches[branchIdx].collectionDate = date;
-    saveData(data);
+async function setCollectionDate(branchDbId, date) {
+    await sb.from('branches').update({ collection_date: date || null }).eq('id', branchDbId);
 }
 
-// ── Equipment Assignment ──
-function assignEquip(companyId, branchIdx) {
-    const sel = document.getElementById(`assignSelect-${companyId}-${branchIdx}`);
+// ── Equipment Assignment (Supabase) ──
+async function assignEquip(branchDbId) {
+    const sel = document.getElementById(`assignSelect-${branchDbId}`);
     if (!sel || !sel.value) return;
-    const data = getData();
-    const company = data.companies.find(c => c.id === companyId);
-    if (!company || !company.branches[branchIdx]) return;
-    if (!company.branches[branchIdx].assignedEquipment) company.branches[branchIdx].assignedEquipment = [];
-    company.branches[branchIdx].assignedEquipment.push(sel.value);
-    saveData(data);
-    renderAll();
+    await sb.from('branch_equipment').insert({ branch_id: branchDbId, equipment_id: sel.value });
+    await renderAll();
     showToast('تم تخصيص المعدة');
 }
 
-function unassignEquip(companyId, branchIdx, equipId) {
-    const data = getData();
-    const company = data.companies.find(c => c.id === companyId);
-    if (!company || !company.branches[branchIdx]) return;
-    company.branches[branchIdx].assignedEquipment = (company.branches[branchIdx].assignedEquipment || []).filter(id => id !== equipId);
-    saveData(data);
-    renderAll();
+async function unassignEquip(branchDbId, equipId) {
+    await sb.from('branch_equipment').delete().eq('branch_id', branchDbId).eq('equipment_id', equipId);
+    await renderAll();
     showToast('تم إزالة المعدة');
 }
 
 // ── Branch Modal ──
 function openBranchModal(companyId, branchIdx) {
-    const data = getData();
-    const company = data.companies.find(c => c.id === companyId);
+    const company = appData.companies.find(c => c.id === companyId);
     if (!company) return;
     const isEdit = branchIdx !== undefined;
     const branch = isEdit ? company.branches[branchIdx] : null;
 
     document.getElementById('branchModalTitle').textContent = isEdit ? 'تعديل الفرع' : 'إضافة فرع';
-
-    const nextBranchNum = (company.branches || []).length + 1;
-    const defaultBranchId = `b-${companyId}-${nextBranchNum}`;
+    const nextNum = (company.branches || []).length + 1;
+    const defId = `b-${companyId}-${nextNum}`;
 
     document.getElementById('branchModalBody').innerHTML = `
         <div class="form-group">
@@ -1478,7 +1460,7 @@ function openBranchModal(companyId, branchIdx) {
         </div>
         <div class="form-group">
             <label class="form-label">رقم الفرع</label>
-            <input class="form-input ltr" id="branchId" value="${isEdit ? esc(branch.id) : defaultBranchId}" placeholder="${defaultBranchId}">
+            <input class="form-input ltr" id="branchDisplayId" value="${isEdit ? esc(branch.id) : defId}" placeholder="${defId}">
         </div>
         <div class="form-row">
             <div class="form-group">
@@ -1503,58 +1485,44 @@ function openBranchModal(companyId, branchIdx) {
                 ${isEdit ? 'حفظ التعديلات' : 'إضافة الفرع'}
             </button>
             <button class="btn btn-ghost" onclick="closeModal('branchModal')">إلغاء</button>
-        </div>
-    `;
+        </div>`;
     openModal('branchModal');
 }
 
-function saveBranch(companyId, branchIdx) {
+async function saveBranch(companyId, branchIdx) {
     const name = document.getElementById('branchName').value.trim();
-    const id = document.getElementById('branchId').value.trim();
+    const displayId = document.getElementById('branchDisplayId').value.trim();
     const amount = Number(document.getElementById('branchAmount').value);
     const subType = document.getElementById('branchSubType').value;
     const fee = Number(document.getElementById('branchFee').value);
 
     if (!name) { document.getElementById('branchName').classList.add('error'); setTimeout(() => document.getElementById('branchName').classList.remove('error'), 1500); return; }
-    if (!id) { document.getElementById('branchId').classList.add('error'); setTimeout(() => document.getElementById('branchId').classList.remove('error'), 1500); return; }
 
-    const data = getData();
-    const company = data.companies.find(c => c.id === companyId);
+    const company = appData.companies.find(c => c.id === companyId);
     if (!company) return;
-    if (!company.branches) company.branches = [];
 
     if (branchIdx >= 0) {
-        const existing = company.branches[branchIdx];
-        existing.name = name;
-        existing.id = id;
-        existing.subscriptionAmount = amount;
-        existing.subscriptionType = subType;
-        existing.foundationFee = fee;
+        const branch = company.branches[branchIdx];
+        await sb.from('branches').update({
+            name, display_id: displayId, subscription_amount: amount,
+            subscription_type: subType, foundation_fee: fee
+        }).eq('id', branch.dbId);
     } else {
-        company.branches.push({
-            id: id,
-            name: name,
-            subscriptionType: subType,
-            subscriptionAmount: amount,
-            foundationFee: fee,
-            paymentCollected: false,
-            collectionDate: null,
-            assignedEquipment: []
+        await sb.from('branches').insert({
+            company_id: companyId, name, display_id: displayId,
+            subscription_amount: amount, subscription_type: subType, foundation_fee: fee
         });
     }
 
-    saveData(data);
     closeModal('branchModal');
-    renderAll();
+    await renderAll();
     showToast(branchIdx >= 0 ? 'تم تعديل الفرع' : 'تم إضافة الفرع');
 }
 
 // ── Equipment Tab ──
 function renderEquipmentTab() {
-    const data = getData();
     const grid = document.getElementById('equipmentGrid');
-
-    grid.innerHTML = data.equipmentCategories.map(cat => `
+    grid.innerHTML = appData.equipmentCategories.map(cat => `
         <div class="equip-container">
             <div class="equip-container-header">
                 <span class="equip-container-title">${esc(cat.name)}</span>
@@ -1573,7 +1541,7 @@ function renderEquipmentTab() {
                 <div class="equip-item">
                     <div class="equip-item-info">
                         <span>${esc(item.name)}</span>
-                        <span class="equip-item-id">#${esc(item.id)}</span>
+                        <span class="equip-item-id">#${esc(item.id).substring(0,8)}</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <span class="equip-item-cost">${formatSARColored(item.cost, '#CD3F20')}</span>
@@ -1581,7 +1549,7 @@ function renderEquipmentTab() {
                             <button class="btn-icon" onclick="openEquipModal('${cat.id}', ${idx})" title="تعديل">
                                 <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
-                            <button class="btn-icon danger" onclick="confirmDelete('equip','${cat.id}',${idx})" title="حذف">
+                            <button class="btn-icon danger" onclick="confirmDelete('equip','${item.id}')" title="حذف">
                                 <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             </button>
                         </div>
@@ -1598,64 +1566,45 @@ function renderEquipmentTab() {
 
 // ── Equipment Modal ──
 function openEquipModal(catId, itemIdx) {
-    const data = getData();
-    const cat = data.equipmentCategories.find(c => c.id === catId);
+    const cat = appData.equipmentCategories.find(c => c.id === catId);
     if (!cat) return;
     const isEdit = itemIdx !== undefined;
     const item = isEdit ? cat.items[itemIdx] : null;
-
     document.getElementById('equipModalTitle').textContent = isEdit ? 'تعديل المعدة' : 'إضافة معدة';
-
-    const nextId = `eq-${Date.now().toString(36)}`;
 
     document.getElementById('equipModalBody').innerHTML = `
         <div class="form-group">
             <label class="form-label">اسم المعدة</label>
-            <input class="form-input" id="equipName" value="${isEdit ? esc(item.name) : ''}" placeholder="مثال: شاشة سامسونج 55 بوصة">
+            <input class="form-input" id="equipName" value="${isEdit ? esc(item.name) : ''}">
         </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label class="form-label">رقم المعدة</label>
-                <input class="form-input ltr" id="equipId" value="${isEdit ? esc(item.id) : nextId}">
-            </div>
-            <div class="form-group">
-                <label class="form-label">التكلفة (ر.س)</label>
-                <input class="form-input ltr" type="number" id="equipCost" value="${isEdit ? item.cost : ''}" placeholder="0">
-            </div>
+        <div class="form-group">
+            <label class="form-label">التكلفة (ر.س)</label>
+            <input class="form-input ltr" type="number" id="equipCost" value="${isEdit ? item.cost : ''}" placeholder="0">
         </div>
+        <input type="hidden" id="equipItemId" value="${isEdit ? item.id : ''}">
         <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px;">
-            <button class="btn btn-primary" onclick="saveEquipItem('${catId}', ${isEdit ? itemIdx : -1})">
+            <button class="btn btn-primary" onclick="saveEquipItem('${catId}', ${isEdit ? 'true' : 'false'})">
                 ${isEdit ? 'حفظ التعديلات' : 'إضافة المعدة'}
             </button>
             <button class="btn btn-ghost" onclick="closeModal('equipModal')">إلغاء</button>
-        </div>
-    `;
+        </div>`;
     openModal('equipModal');
 }
 
-function saveEquipItem(catId, itemIdx) {
+async function saveEquipItem(catId, isEdit) {
     const name = document.getElementById('equipName').value.trim();
-    const id = document.getElementById('equipId').value.trim();
     const cost = Number(document.getElementById('equipCost').value);
-
     if (!name) { document.getElementById('equipName').classList.add('error'); setTimeout(() => document.getElementById('equipName').classList.remove('error'), 1500); return; }
-    if (!id) { document.getElementById('equipId').classList.add('error'); setTimeout(() => document.getElementById('equipId').classList.remove('error'), 1500); return; }
 
-    const data = getData();
-    const cat = data.equipmentCategories.find(c => c.id === catId);
-    if (!cat) return;
-    if (!cat.items) cat.items = [];
-
-    if (itemIdx >= 0) {
-        cat.items[itemIdx] = { id, name, cost };
+    if (isEdit === true || isEdit === 'true') {
+        const itemId = document.getElementById('equipItemId').value;
+        await sb.from('equipment_items').update({ name, cost }).eq('id', itemId);
     } else {
-        cat.items.push({ id, name, cost });
+        await sb.from('equipment_items').insert({ category_id: catId, name, cost });
     }
-
-    saveData(data);
     closeModal('equipModal');
-    renderAll();
-    showToast(itemIdx >= 0 ? 'تم تعديل المعدة' : 'تم إضافة المعدة');
+    await renderAll();
+    showToast(isEdit ? 'تم تعديل المعدة' : 'تم إضافة المعدة');
 }
 
 // ── Category Modal ──
@@ -1668,14 +1617,12 @@ function openCategoryModal() {
         <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px;">
             <button class="btn btn-primary" onclick="saveCategory()">إضافة الفئة</button>
             <button class="btn btn-ghost" onclick="closeModal('categoryModal')">إلغاء</button>
-        </div>
-    `;
+        </div>`;
     openModal('categoryModal');
 }
 
 function editCategory(catId) {
-    const data = getData();
-    const cat = data.equipmentCategories.find(c => c.id === catId);
+    const cat = appData.equipmentCategories.find(c => c.id === catId);
     if (!cat) return;
     document.getElementById('categoryModalBody').innerHTML = `
         <div class="form-group">
@@ -1685,44 +1632,38 @@ function editCategory(catId) {
         <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px;">
             <button class="btn btn-primary" onclick="updateCategory('${catId}')">حفظ التعديلات</button>
             <button class="btn btn-ghost" onclick="closeModal('categoryModal')">إلغاء</button>
-        </div>
-    `;
+        </div>`;
     openModal('categoryModal');
 }
 
-function saveCategory() {
+async function saveCategory() {
     const name = document.getElementById('catName').value.trim();
     if (!name) { document.getElementById('catName').classList.add('error'); setTimeout(() => document.getElementById('catName').classList.remove('error'), 1500); return; }
-    const data = getData();
-    data.equipmentCategories.push({ id: 'cat-' + Date.now().toString(36), name, items: [] });
-    saveData(data);
+    await sb.from('equipment_categories').insert({ name });
     closeModal('categoryModal');
-    renderAll();
+    await renderAll();
     showToast('تم إضافة الفئة');
 }
 
-function updateCategory(catId) {
+async function updateCategory(catId) {
     const name = document.getElementById('catName').value.trim();
     if (!name) return;
-    const data = getData();
-    const cat = data.equipmentCategories.find(c => c.id === catId);
-    if (cat) cat.name = name;
-    saveData(data);
+    await sb.from('equipment_categories').update({ name }).eq('id', catId);
     closeModal('categoryModal');
-    renderAll();
+    await renderAll();
     showToast('تم تعديل الفئة');
 }
 
 // ── Add Company Form ──
-function renderAddCompanyForm() {
-    const data = getData();
+async function renderAddCompanyForm() {
+    const { data: maxRow } = await sb.from('companies').select('id').order('id', { ascending: false }).limit(1);
+    const nextId = (maxRow && maxRow.length > 0) ? maxRow[0].id + 1 : 1001;
     const form = document.getElementById('addCompanyForm');
-
     form.innerHTML = `
         <div class="form-row">
             <div class="form-group">
                 <label class="form-label">رقم الشركة</label>
-                <input class="form-input ltr" type="number" id="companyId" value="${data.nextCompanyId}" placeholder="${data.nextCompanyId}">
+                <input class="form-input ltr" type="number" id="companyId" value="${nextId}" placeholder="${nextId}">
                 <div class="form-error" id="idError">رقم الشركة مستخدم بالفعل</div>
             </div>
             <div class="form-group">
@@ -1754,8 +1695,7 @@ function renderAddCompanyForm() {
         <button class="btn btn-primary" style="margin-top:8px;" onclick="addCompany()">
             <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             إضافة الشركة
-        </button>
-    `;
+        </button>`;
 }
 
 function showFieldError(fieldId, errorId) {
@@ -1767,7 +1707,7 @@ function showFieldError(fieldId, errorId) {
     }, 2000);
 }
 
-function addCompany() {
+async function addCompany() {
     const id = Number(document.getElementById('companyId').value);
     const name = document.getElementById('companyName').value.trim();
     const amount = Number(document.getElementById('companyAmount').value);
@@ -1775,34 +1715,18 @@ function addCompany() {
     const fee = Number(document.getElementById('companyFee').value);
 
     let valid = true;
-
     if (!name) { showFieldError('companyName', 'nameError'); valid = false; }
     if (!amount) { showFieldError('companyAmount', 'amountError'); valid = false; }
-    if (!fee && fee !== 0) { showFieldError('companyFee', 'feeError'); valid = false; }
 
-    const data = getData();
-    if (data.companies.some(c => c.id === id)) {
-        showFieldError('companyId', 'idError');
-        valid = false;
-    }
-
+    const { data: existing } = await sb.from('companies').select('id').eq('id', id);
+    if (existing && existing.length > 0) { showFieldError('companyId', 'idError'); valid = false; }
     if (!valid) return;
 
-    data.companies.push({
-        id: id,
-        name: name,
-        defaultSubscriptionAmount: amount,
-        defaultSubscriptionType: subType,
-        defaultFoundationFee: fee,
-        branches: []
+    await sb.from('companies').insert({
+        id, name, default_subscription_amount: amount,
+        default_subscription_type: subType, default_foundation_fee: fee
     });
-
-    if (id >= data.nextCompanyId) {
-        data.nextCompanyId = id + 1;
-    }
-
-    saveData(data);
-    renderAll();
+    await renderAll();
     switchTab('tabCustomers', document.querySelector('[data-tab=tabCustomers]'));
     showToast('تم إضافة الشركة بنجاح');
 }
@@ -1817,32 +1741,20 @@ function confirmDelete(type, ...args) {
     else if (type === 'branch') msg = 'هل أنت متأكد من حذف هذا الفرع؟';
     else if (type === 'category') msg = 'هل أنت متأكد من حذف هذه الفئة وجميع معداتها؟';
     else if (type === 'equip') msg = 'هل أنت متأكد من حذف هذه المعدة؟';
-
     document.getElementById('confirmMsg').textContent = msg;
     document.getElementById('confirmBtn').onclick = executeDelete;
     openModal('confirmModal');
 }
 
-function executeDelete() {
+async function executeDelete() {
     if (!pendingDelete) return;
-    const data = getData();
     const { type, args } = pendingDelete;
-
-    if (type === 'company') {
-        data.companies = data.companies.filter(c => c.id !== args[0]);
-    } else if (type === 'branch') {
-        const company = data.companies.find(c => c.id === args[0]);
-        if (company) company.branches.splice(args[1], 1);
-    } else if (type === 'category') {
-        data.equipmentCategories = data.equipmentCategories.filter(c => c.id !== args[0]);
-    } else if (type === 'equip') {
-        const cat = data.equipmentCategories.find(c => c.id === args[0]);
-        if (cat) cat.items.splice(args[1], 1);
-    }
-
-    saveData(data);
+    if (type === 'company') await sb.from('companies').delete().eq('id', args[0]);
+    else if (type === 'branch') await sb.from('branches').delete().eq('id', args[0]);
+    else if (type === 'category') await sb.from('equipment_categories').delete().eq('id', args[0]);
+    else if (type === 'equip') await sb.from('equipment_items').delete().eq('id', args[0]);
     closeModal('confirmModal');
-    renderAll();
+    await renderAll();
     pendingDelete = null;
     showToast('تم الحذف بنجاح');
 }
@@ -1861,8 +1773,9 @@ function spawnParticles() {
 }
 
 // ── Render All ──
-function renderAll() {
+async function renderAll() {
     const expandedCards = [...document.querySelectorAll('.company-card.expanded')].map(c => c.id.replace('card-', ''));
+    await fetchAllData();
     renderHeaderStats();
     renderFinancialBar();
     renderCompanyList();
@@ -1873,11 +1786,20 @@ function renderAll() {
     });
 }
 
+// ── Real-Time Sync ──
+sb.channel('erp-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'companies' }, () => renderAll())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'branches' }, () => renderAll())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'equipment_categories' }, () => renderAll())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'equipment_items' }, () => renderAll())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'branch_equipment' }, () => renderAll())
+    .subscribe();
+
 // ── Init ──
-function init() {
+async function init() {
     spawnParticles();
-    renderAll();
-    renderAddCompanyForm();
+    await renderAll();
+    await renderAddCompanyForm();
 }
 
 init();
