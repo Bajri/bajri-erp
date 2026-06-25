@@ -114,31 +114,6 @@
             letter-spacing: -0.5px;
         }
         .logo-area h1 span { font-weight: 800; }
-        .header-stats {
-            display: flex;
-            gap: 24px;
-            align-items: center;
-        }
-        .header-stat {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: rgba(255,255,255,0.9);
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-        .header-stat .label {
-            opacity: 0.7;
-            font-size: 0.75rem;
-        }
-        .header-stat .value {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 600;
-            font-size: 0.95rem;
-            direction: ltr;
-        }
-        .header-stat .sar-icon { opacity: 0.8; }
-
         /* ── Body Row ── */
         .body-row {
             display: flex;
@@ -250,44 +225,6 @@
             border-radius: 2px;
         }
 
-        /* ── Financial Summary Bar ── */
-        .financial-bar {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .fin-card {
-            flex: 1;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: var(--card-radius);
-            padding: 16px 20px;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s var(--bounce);
-        }
-        .fin-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-        .fin-card .fin-label {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-        .fin-card .fin-value {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            direction: ltr;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .fin-card.inflow { border-right: 3px solid var(--success); }
-        .fin-card.outflow { border-right: 3px solid var(--error); }
-        .fin-card.net { border-right: 3px solid var(--accent); }
-
         /* ── Company Cards ── */
         .company-list {
             display: flex;
@@ -371,33 +308,6 @@
             border-radius: 20px;
         }
 
-        .card-financials {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .card-fin-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.85rem;
-        }
-        .card-fin-item .fin-amount {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 600;
-            direction: ltr;
-        }
-        .card-fin-item.in .fin-amount { color: var(--success); }
-        .card-fin-item.out .fin-amount { color: var(--error); }
-        .card-fin-item .fin-tag {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-        .card-fin-divider {
-            width: 1px;
-            height: 20px;
-            background: var(--border);
-        }
         .expand-chevron {
             color: var(--text-muted);
             transition: transform 0.3s var(--bounce);
@@ -961,6 +871,289 @@
             color: var(--text-primary);
             outline: none;
         }
+
+        /* ── Dashboard Tab ── */
+        .dash-hero {
+            position: relative;
+            text-align: center;
+            padding: 24px 0 8px;
+            margin-bottom: 20px;
+        }
+        .dash-hero-anim {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 12px;
+        }
+        .coin {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #CD3F20 0%, #e65a3a 50%, #f0a060 100%);
+            box-shadow: 0 4px 12px rgba(205,63,32,0.25);
+        }
+        .coin::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.5);
+        }
+        .coin-1 { width: 40px; height: 40px; top: 10px; right: 12px; animation: coinFloat1 3.5s ease-in-out infinite; }
+        .coin-2 { width: 32px; height: 32px; top: 40px; left: 10px; animation: coinFloat2 4s ease-in-out infinite 0.5s; }
+        .coin-3 { width: 28px; height: 28px; bottom: 8px; right: 30px; animation: coinFloat3 3s ease-in-out infinite 1s; }
+        .coin-4 { width: 22px; height: 22px; bottom: 20px; left: 35px; animation: coinFloat1 4.5s ease-in-out infinite 1.5s; opacity: 0.7; }
+        .coin-sar {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .coin-sar svg { width: 50%; height: 50%; }
+        @keyframes coinFloat1 {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-14px) rotate(8deg); }
+        }
+        @keyframes coinFloat2 {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(-6deg); }
+        }
+        @keyframes coinFloat3 {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-12px) scale(1.08); }
+        }
+        .dash-hero-title {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .dash-fin-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .dash-fin-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s var(--bounce);
+            position: relative;
+            overflow: hidden;
+        }
+        .dash-fin-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+        .dash-fin-card .dash-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .dash-fin-card .dash-icon svg {
+            width: 22px; height: 22px;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+        .dash-fin-card.inflow .dash-icon { background: var(--success-soft); }
+        .dash-fin-card.inflow .dash-icon svg { stroke: var(--success); }
+        .dash-fin-card.outflow .dash-icon { background: rgba(248,113,113,0.12); }
+        .dash-fin-card.outflow .dash-icon svg { stroke: var(--error); }
+        .dash-fin-card.net .dash-icon { background: var(--accent-soft); }
+        .dash-fin-card.net .dash-icon svg { stroke: var(--accent); }
+        .dash-fin-card .dash-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .dash-fin-card .dash-amount {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            direction: ltr;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .dash-fin-card.inflow { border-right: 3px solid var(--success); }
+        .dash-fin-card.outflow { border-right: 3px solid var(--error); }
+        .dash-fin-card.net { border-right: 3px solid var(--accent); }
+
+        .dash-stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .dash-stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s var(--bounce);
+        }
+        .dash-stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .dash-stat-card .stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .dash-stat-card .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .dash-stat-card .stat-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: var(--accent-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+        }
+        .dash-stat-card .stat-icon svg {
+            width: 18px; height: 18px;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .dash-table-wrap {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .dash-table-title {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dash-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .dash-table th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-align: right;
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+        .dash-table td {
+            font-size: 0.85rem;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(205,63,32,0.06);
+            color: var(--text-primary);
+        }
+        .dash-table tr:last-child td { border-bottom: none; }
+        .dash-table tr:hover td { background: var(--accent-soft); }
+        .dash-table .ltr-cell {
+            font-family: 'Space Grotesk', sans-serif;
+            direction: ltr;
+            text-align: left;
+        }
+        .dash-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 500;
+        }
+        .dash-status-badge.collected { background: var(--success-soft); color: #047857; }
+        .dash-status-badge.pending { background: var(--warning-soft); color: #92400e; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .app-header { padding: 0 16px; height: 52px; }
+            .logo-area svg { width: 26px; height: 26px; }
+            .logo-area h1 { font-size: 1.1rem; }
+            .body-row { flex-direction: column; min-height: calc(100vh - 52px); }
+            .sidebar {
+                width: 100%;
+                height: 56px;
+                flex-direction: row;
+                justify-content: center;
+                order: 2;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                z-index: 50;
+                border-left: none;
+                border-top: 1px solid var(--border);
+                padding: 0;
+                gap: 4px;
+                box-shadow: 0 -2px 12px rgba(205,63,32,0.06);
+            }
+            .sidebar-tab { width: 48px; height: 48px; }
+            .sidebar-tab .tooltip { display: none; }
+            .sidebar-divider { display: none; }
+            .main-area {
+                padding: 16px;
+                padding-bottom: 72px;
+                order: 1;
+            }
+            .dash-fin-cards { grid-template-columns: 1fr; }
+            .dash-stats-row { grid-template-columns: repeat(2, 1fr); }
+            .dash-table-wrap { overflow-x: auto; }
+            .dash-table { min-width: 500px; }
+            .company-list { padding-left: 8px; }
+            .company-card { padding: 14px 16px; padding-right: 26px; }
+            .card-top { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .card-meta { flex-wrap: wrap; gap: 8px; }
+            .branch-top { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .branch-actions { flex-wrap: wrap; }
+            .branch-details { gap: 8px; }
+            .form-row { flex-direction: column; gap: 0; }
+            .form-card { padding: 20px; max-width: 100%; }
+            .equipment-grid { grid-template-columns: 1fr; }
+            .section-title { font-size: 1.15rem; }
+            .modal-box { width: 95%; max-width: none; padding: 20px; border-radius: 16px; }
+            .equip-assign-row { flex-wrap: wrap; }
+            .equip-assign-select { min-width: 0; }
+        }
+        @media (max-width: 480px) {
+            .main-area { padding: 12px; padding-bottom: 68px; }
+            .sidebar { height: 52px; }
+            .sidebar-tab { width: 42px; height: 42px; border-radius: 10px; }
+            .sidebar-tab svg { width: 20px; height: 20px; }
+            .dash-hero-anim { width: 90px; height: 90px; }
+            .coin-1 { width: 30px; height: 30px; }
+            .coin-2 { width: 24px; height: 24px; }
+            .coin-3 { width: 20px; height: 20px; }
+            .coin-4 { width: 16px; height: 16px; }
+            .dash-stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .dash-stat-card { padding: 12px; }
+            .dash-stat-card .stat-num { font-size: 1.4rem; }
+            .pay-toggle { font-size: 0.72rem; padding: 5px 10px; }
+            .btn-sm { font-size: 0.7rem; padding: 4px 8px; }
+            .branch-item { padding: 10px 12px; }
+            .company-card { padding: 12px 14px; padding-right: 24px; }
+            .payment-dot { width: 18px; height: 18px; left: -9px; top: 20px; }
+            .toast { bottom: 64px; font-size: 0.8rem; }
+        }
     </style>
 </head>
 <body>
@@ -980,19 +1173,26 @@
                 </svg>
                 <h1><span>Bajri</span> ERP</h1>
             </div>
-            <div class="header-stats" id="headerStats"></div>
         </header>
 
         <div class="body-row">
             <!-- Main Content -->
             <main class="main-area">
+                <!-- Dashboard Tab -->
+                <div class="tab-content active" id="tabDashboard">
+                    <div class="section-title">
+                        <span class="accent-bar"></span>
+                        لوحة التحكم
+                    </div>
+                    <div id="dashboardContent"></div>
+                </div>
+
                 <!-- Customers Tab -->
-                <div class="tab-content active" id="tabCustomers">
+                <div class="tab-content" id="tabCustomers">
                     <div class="section-title">
                         <span class="accent-bar"></span>
                         العملاء
                     </div>
-                    <div class="financial-bar" id="financialBar"></div>
                     <div class="company-list" id="companyList"></div>
                 </div>
 
@@ -1021,7 +1221,12 @@
 
             <!-- Sidebar -->
             <nav class="sidebar">
-                <button class="sidebar-tab active" data-tab="tabCustomers" onclick="switchTab('tabCustomers', this)">
+                <button class="sidebar-tab active" data-tab="tabDashboard" onclick="switchTab('tabDashboard', this)">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    <span class="tooltip">لوحة التحكم</span>
+                </button>
+                <div class="sidebar-divider"></div>
+                <button class="sidebar-tab" data-tab="tabCustomers" onclick="switchTab('tabCustomers', this)">
                     <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     <span class="tooltip">العملاء</span>
                 </button>
@@ -1159,6 +1364,7 @@ async function fetchAllData() {
             subscriptionAmount: Number(b.subscription_amount),
             foundationFee: Number(b.foundation_fee),
             paymentCollected: b.payment_collected,
+            paymentDate: b.payment_date,
             collectionDate: b.collection_date,
             assignedEquipment: branchEquipIds
         });
@@ -1230,42 +1436,115 @@ function isCompanyCollected(company) {
 
 const subLabels = { monthly: 'شهري', quarterly: 'ربع سنوي', yearly: 'سنوي' };
 
-// ── Render Header Stats ──
-function renderHeaderStats() {
-    let totalIn = 0, totalOut = 0;
-    appData.companies.forEach(c => { totalIn += calcCompanyInflow(c); totalOut += calcCompanyOutflow(c); });
-    document.getElementById('headerStats').innerHTML = `
-        <div class="header-stat">
-            <span class="label">تدفقات داخلية</span>
-            <span class="value">${totalIn.toLocaleString('en-US')}</span>
-            <span class="sar-icon">${sarSVG(13, 'rgba(255,255,255,0.8)')}</span>
-        </div>
-        <div class="header-stat">
-            <span class="label">تدفقات خارجية</span>
-            <span class="value">${totalOut.toLocaleString('en-US')}</span>
-            <span class="sar-icon">${sarSVG(13, 'rgba(255,255,255,0.8)')}</span>
-        </div>
-    `;
-}
-
-// ── Render Financial Bar ──
-function renderFinancialBar() {
+// ── Render Dashboard ──
+function renderDashboard() {
     let totalIn = 0, totalOut = 0;
     appData.companies.forEach(c => { totalIn += calcCompanyInflow(c); totalOut += calcCompanyOutflow(c); });
     const net = totalIn - totalOut;
-    document.getElementById('financialBar').innerHTML = `
-        <div class="fin-card inflow">
-            <div class="fin-label">تدفقات داخلية</div>
-            <div class="fin-value">${formatSARColored(totalIn, '#34d399')}</div>
+    const totalBranches = appData.companies.reduce((s, c) => s + (c.branches || []).length, 0);
+    const totalEquip = appData.equipmentCategories.reduce((s, c) => s + (c.items || []).length, 0);
+    const allBranches = appData.companies.flatMap(c => c.branches || []);
+    const collectedCount = allBranches.filter(b => b.paymentCollected).length;
+
+    const sarIcon = `<svg viewBox="0 0 1000 1000" fill="#fff" width="18" height="18"><path d="M560.8 576.6c-44.4 0-78.2-10.6-101.4-31.6-23.2-21.2-34.8-52.4-34.8-93.8V163.6h72.8v285.8c0 26.4 7 46 20.8 58.8 14 12.8 34.4 19.2 61.2 19.2h32.2v49.2h-50.8zm-186-197.8h-72.6V163.6h72.6v215.2zm0 197.8h-72.6V439.4h72.6v137.2zM277.4 836.4H204V615.2l-90-69.6 44.6-57.8 118.8 91.8v256.8zm445-0H649.8V579.6l118.8-91.8 44.6 57.8-90 69.6v221.2z"/></svg>`;
+
+    document.getElementById('dashboardContent').innerHTML = `
+        <div class="dash-hero">
+            <div class="dash-hero-anim">
+                <div class="coin coin-1"><span class="coin-sar">${sarIcon}</span></div>
+                <div class="coin coin-2"><span class="coin-sar">${sarIcon}</span></div>
+                <div class="coin coin-3"><span class="coin-sar">${sarIcon}</span></div>
+                <div class="coin coin-4"><span class="coin-sar">${sarIcon}</span></div>
+            </div>
+            <div class="dash-hero-title">نظرة عامة على التدفقات المالية</div>
         </div>
-        <div class="fin-card outflow">
-            <div class="fin-label">تدفقات خارجية</div>
-            <div class="fin-value">${formatSARColored(totalOut, '#f87171')}</div>
+
+        <div class="dash-fin-cards">
+            <div class="dash-fin-card inflow">
+                <div class="dash-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 13 15 11 13 8 16 2 16"/><polyline points="22 6 22 12 16 12"/></svg></div>
+                <div class="dash-label">تدفقات داخلية</div>
+                <div class="dash-amount">${formatSARColored(totalIn, '#34d399')}</div>
+            </div>
+            <div class="dash-fin-card outflow">
+                <div class="dash-icon"><svg viewBox="0 0 24 24"><polyline points="22 16 16 16 13 13 11 15 8 12 2 12"/><polyline points="22 22 22 16 16 16"/></svg></div>
+                <div class="dash-label">تدفقات خارجية</div>
+                <div class="dash-amount">${formatSARColored(totalOut, '#f87171')}</div>
+            </div>
+            <div class="dash-fin-card net">
+                <div class="dash-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                <div class="dash-label">صافي</div>
+                <div class="dash-amount">${formatSARColored(net, '#CD3F20')}</div>
+            </div>
         </div>
-        <div class="fin-card net">
-            <div class="fin-label">صافي</div>
-            <div class="fin-value">${formatSARColored(net, '#CD3F20')}</div>
+
+        <div class="dash-stats-row">
+            <div class="dash-stat-card">
+                <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+                <div class="stat-num">${appData.companies.length}</div>
+                <div class="stat-label">شركة</div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                <div class="stat-num">${totalBranches}</div>
+                <div class="stat-label">فرع</div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+                <div class="stat-num">${totalEquip}</div>
+                <div class="stat-label">معدة</div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                <div class="stat-num">${collectedCount}/${totalBranches}</div>
+                <div class="stat-label">تم التحصيل</div>
+            </div>
         </div>
+
+        ${appData.companies.length > 0 ? `
+        <div class="dash-table-wrap">
+            <div class="dash-table-title">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--accent)" fill="none" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                تفاصيل الشركات المالية
+            </div>
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>الشركة</th>
+                        <th>الرقم</th>
+                        <th>الفروع</th>
+                        <th>تدفقات داخلية</th>
+                        <th>تدفقات خارجية</th>
+                        <th>صافي</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${appData.companies.map(c => {
+                        const cin = calcCompanyInflow(c);
+                        const cout = calcCompanyOutflow(c);
+                        const cnet = cin - cout;
+                        const coll = isCompanyCollected(c);
+                        return `<tr>
+                            <td>${esc(c.name)}</td>
+                            <td class="ltr-cell">#${c.id}</td>
+                            <td>${(c.branches || []).length}</td>
+                            <td class="ltr-cell" style="color:var(--success)">${formatSARColored(cin, '#34d399')}</td>
+                            <td class="ltr-cell" style="color:var(--error)">${formatSARColored(cout, '#f87171')}</td>
+                            <td class="ltr-cell" style="color:var(--accent)">${formatSARColored(cnet, '#CD3F20')}</td>
+                            <td><span class="dash-status-badge ${coll ? 'collected' : 'pending'}">${coll ? 'مكتمل' : 'قيد التحصيل'}</span></td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>` : `
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <p>لا توجد بيانات بعد — أضف شركة للبدء</p>
+            <button class="btn btn-primary" onclick="switchTab('tabAddCompany', document.querySelector('[data-tab=tabAddCompany]'))">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                إضافة شركة
+            </button>
+        </div>`}
     `;
 }
 
@@ -1286,8 +1565,6 @@ function renderCompanyList() {
     }
 
     container.innerHTML = appData.companies.map(c => {
-        const inflow = calcCompanyInflow(c);
-        const outflow = calcCompanyOutflow(c);
         const collected = isCompanyCollected(c);
         const branchCount = (c.branches || []).length;
         return `
@@ -1298,18 +1575,7 @@ function renderCompanyList() {
                         <span class="company-name">${esc(c.name)}</span>
                         <span class="company-id">#${c.id}</span>
                     </div>
-                    <div class="card-financials">
-                        <div class="card-fin-item in">
-                            <span class="fin-tag">تدفقات داخلية</span>
-                            <span class="fin-amount">${formatSARColored(inflow, '#34d399')}</span>
-                        </div>
-                        <div class="card-fin-divider"></div>
-                        <div class="card-fin-item out">
-                            <span class="fin-tag">تدفقات خارجية</span>
-                            <span class="fin-amount">${formatSARColored(outflow, '#f87171')}</span>
-                        </div>
-                        <svg class="expand-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-                    </div>
+                    <svg class="expand-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </div>
                 <div class="card-meta">
                     <span class="meta-badge">${subLabels[c.defaultSubscriptionType] || c.defaultSubscriptionType}</span>
@@ -1344,8 +1610,6 @@ function renderBranches(company) {
     const allItems = appData.equipmentCategories.flatMap(c => c.items || []);
 
     return company.branches.map((b, idx) => {
-        const branchInflow = calcBranchInflow(b);
-        const branchOutflow = calcBranchOutflow(b);
         const assignedItems = (b.assignedEquipment || []).map(eqId => allItems.find(i => i.id === eqId)).filter(Boolean);
         const unassignedItems = allItems.filter(i => !(b.assignedEquipment || []).includes(i.id));
 
@@ -1373,15 +1637,17 @@ function renderBranches(company) {
                     <div class="branch-detail"><span>الاشتراك:</span> <span class="val">${formatSAR(b.subscriptionAmount)}</span></div>
                     <div class="branch-detail"><span>النوع:</span> <span class="meta-badge">${subLabels[b.subscriptionType] || b.subscriptionType}</span></div>
                     <div class="branch-detail"><span>رسوم تأسيس:</span> <span class="val">${formatSAR(b.foundationFee)}</span></div>
-                    <div class="branch-detail"><span>تدفقات داخلية:</span> <span class="val" style="color:var(--success)">${formatSARColored(branchInflow, '#34d399')}</span></div>
-                    <div class="branch-detail"><span>تدفقات خارجية:</span> <span class="val" style="color:var(--error)">${formatSARColored(branchOutflow, '#f87171')}</span></div>
                 </div>
-                ${b.paymentCollected && b.collectionDate ? `<div class="collection-date">تاريخ التحصيل: ${b.collectionDate}</div>` : ''}
-                ${b.paymentCollected ? '' : `
-                    <div style="margin-top:8px;">
+                <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <label style="font-size:0.75rem;color:var(--text-muted);">تاريخ الدفع:</label>
+                        <input type="date" class="date-input" value="${b.paymentDate || ''}" onchange="setPaymentDate('${b.dbId}',this.value)" onclick="event.stopPropagation()">
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;">
                         <label style="font-size:0.75rem;color:var(--text-muted);">تاريخ التحصيل:</label>
                         <input type="date" class="date-input" value="${b.collectionDate || ''}" onchange="setCollectionDate('${b.dbId}',this.value)" onclick="event.stopPropagation()">
-                    </div>`}
+                    </div>
+                </div>
                 <div class="branch-equipment">
                     <div class="branch-equip-title">المعدات المخصصة</div>
                     ${assignedItems.length ? assignedItems.map(item => `
@@ -1401,6 +1667,10 @@ function renderBranches(company) {
                             </select>
                             <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();assignEquip('${b.dbId}')">تخصيص</button>
                         </div>` : ''}
+                    <button class="btn btn-sm btn-ghost" style="margin-top:6px;" onclick="event.stopPropagation();openEquipModalForBranch('${b.dbId}')">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        إضافة معدة جديدة
+                    </button>
                 </div>
             </div>`;
     }).join('');
@@ -1425,6 +1695,10 @@ async function togglePayment(branchDbId, currentState) {
 
 async function setCollectionDate(branchDbId, date) {
     await sb.from('branches').update({ collection_date: date || null }).eq('id', branchDbId);
+}
+
+async function setPaymentDate(branchDbId, date) {
+    await sb.from('branches').update({ payment_date: date || null }).eq('id', branchDbId);
 }
 
 // ── Equipment Assignment (Supabase) ──
@@ -1480,6 +1754,16 @@ function openBranchModal(companyId, branchIdx) {
             <label class="form-label">رسوم التأسيس</label>
             <input class="form-input ltr" type="number" id="branchFee" value="${isEdit ? branch.foundationFee : company.defaultFoundationFee}" placeholder="0">
         </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">تاريخ الدفع</label>
+                <input class="form-input ltr" type="date" id="branchPaymentDate" value="${isEdit && branch.paymentDate ? branch.paymentDate : ''}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">تاريخ التحصيل</label>
+                <input class="form-input ltr" type="date" id="branchCollectionDate" value="${isEdit && branch.collectionDate ? branch.collectionDate : ''}">
+            </div>
+        </div>
         <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px;">
             <button class="btn btn-primary" onclick="saveBranch(${companyId}, ${isEdit ? branchIdx : -1})">
                 ${isEdit ? 'حفظ التعديلات' : 'إضافة الفرع'}
@@ -1495,6 +1779,8 @@ async function saveBranch(companyId, branchIdx) {
     const amount = Number(document.getElementById('branchAmount').value);
     const subType = document.getElementById('branchSubType').value;
     const fee = Number(document.getElementById('branchFee').value);
+    const paymentDate = document.getElementById('branchPaymentDate').value || null;
+    const collectionDate = document.getElementById('branchCollectionDate').value || null;
 
     if (!name) { document.getElementById('branchName').classList.add('error'); setTimeout(() => document.getElementById('branchName').classList.remove('error'), 1500); return; }
 
@@ -1505,12 +1791,14 @@ async function saveBranch(companyId, branchIdx) {
         const branch = company.branches[branchIdx];
         await sb.from('branches').update({
             name, display_id: displayId, subscription_amount: amount,
-            subscription_type: subType, foundation_fee: fee
+            subscription_type: subType, foundation_fee: fee,
+            payment_date: paymentDate, collection_date: collectionDate
         }).eq('id', branch.dbId);
     } else {
         await sb.from('branches').insert({
             company_id: companyId, name, display_id: displayId,
-            subscription_amount: amount, subscription_type: subType, foundation_fee: fee
+            subscription_amount: amount, subscription_type: subType, foundation_fee: fee,
+            payment_date: paymentDate, collection_date: collectionDate
         });
     }
 
@@ -1565,7 +1853,10 @@ function renderEquipmentTab() {
 }
 
 // ── Equipment Modal ──
+let autoAssignBranchId = null;
+
 function openEquipModal(catId, itemIdx) {
+    autoAssignBranchId = null;
     const cat = appData.equipmentCategories.find(c => c.id === catId);
     if (!cat) return;
     const isEdit = itemIdx !== undefined;
@@ -1582,8 +1873,9 @@ function openEquipModal(catId, itemIdx) {
             <input class="form-input ltr" type="number" id="equipCost" value="${isEdit ? item.cost : ''}" placeholder="0">
         </div>
         <input type="hidden" id="equipItemId" value="${isEdit ? item.id : ''}">
+        <input type="hidden" id="equipCatId" value="${catId}">
         <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px;">
-            <button class="btn btn-primary" onclick="saveEquipItem('${catId}', ${isEdit ? 'true' : 'false'})">
+            <button class="btn btn-primary" onclick="saveEquipItem(${isEdit ? 'true' : 'false'})">
                 ${isEdit ? 'حفظ التعديلات' : 'إضافة المعدة'}
             </button>
             <button class="btn btn-ghost" onclick="closeModal('equipModal')">إلغاء</button>
@@ -1591,7 +1883,33 @@ function openEquipModal(catId, itemIdx) {
     openModal('equipModal');
 }
 
-async function saveEquipItem(catId, isEdit) {
+function openEquipModalForBranch(branchDbId) {
+    autoAssignBranchId = branchDbId;
+    document.getElementById('equipModalTitle').textContent = 'إضافة معدة جديدة';
+    document.getElementById('equipModalBody').innerHTML = `
+        <div class="form-group">
+            <label class="form-label">الفئة</label>
+            <select class="form-select" id="equipCatSelect">
+                ${appData.equipmentCategories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">اسم المعدة</label>
+            <input class="form-input" id="equipName" placeholder="مثال: شاشة سامسونج 55 بوصة">
+        </div>
+        <div class="form-group">
+            <label class="form-label">التكلفة (ر.س)</label>
+            <input class="form-input ltr" type="number" id="equipCost" placeholder="0">
+        </div>
+        <input type="hidden" id="equipItemId" value="">
+        <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px;">
+            <button class="btn btn-primary" onclick="saveEquipItem(false)">إضافة وتخصيص</button>
+            <button class="btn btn-ghost" onclick="closeModal('equipModal')">إلغاء</button>
+        </div>`;
+    openModal('equipModal');
+}
+
+async function saveEquipItem(isEdit) {
     const name = document.getElementById('equipName').value.trim();
     const cost = Number(document.getElementById('equipCost').value);
     if (!name) { document.getElementById('equipName').classList.add('error'); setTimeout(() => document.getElementById('equipName').classList.remove('error'), 1500); return; }
@@ -1600,8 +1918,16 @@ async function saveEquipItem(catId, isEdit) {
         const itemId = document.getElementById('equipItemId').value;
         await sb.from('equipment_items').update({ name, cost }).eq('id', itemId);
     } else {
-        await sb.from('equipment_items').insert({ category_id: catId, name, cost });
+        const catSelect = document.getElementById('equipCatSelect');
+        const catIdEl = document.getElementById('equipCatId');
+        const catId = catSelect ? catSelect.value : (catIdEl ? catIdEl.value : null);
+        if (!catId) return;
+        const { data: newItem } = await sb.from('equipment_items').insert({ category_id: catId, name, cost }).select().single();
+        if (autoAssignBranchId && newItem) {
+            await sb.from('branch_equipment').insert({ branch_id: autoAssignBranchId, equipment_id: newItem.id });
+        }
     }
+    autoAssignBranchId = null;
     closeModal('equipModal');
     await renderAll();
     showToast(isEdit ? 'تم تعديل المعدة' : 'تم إضافة المعدة');
@@ -1776,8 +2102,7 @@ function spawnParticles() {
 async function renderAll() {
     const expandedCards = [...document.querySelectorAll('.company-card.expanded')].map(c => c.id.replace('card-', ''));
     await fetchAllData();
-    renderHeaderStats();
-    renderFinancialBar();
+    renderDashboard();
     renderCompanyList();
     renderEquipmentTab();
     expandedCards.forEach(id => {
